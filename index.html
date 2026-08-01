@@ -457,7 +457,17 @@
   .quiz-result .qr-label{font-size:.85rem;color:var(--paper-dim);letter-spacing:.3em}
   .quiz-result .qr-name{font-size:2.2rem;color:var(--gold);font-weight:700;margin:.4em 0;letter-spacing:.1em}
   .quiz-result .qr-desc{color:#cfc7b2;line-height:2;max-width:480px;margin:0 auto 1rem}
-  .quiz-result .qr-sub{font-size:.88rem;color:var(--paper-dim);margin-bottom:1.4rem}
+  .quiz-result .qr-sub{font-size:.88rem;color:var(--paper-dim);margin:1rem 0 1.4rem}
+  .quiz-result .qr-tie{color:var(--gold-soft);font-size:.92rem;margin-bottom:1rem}
+  .quiz-result .qr-block{color:#cfc7b2;line-height:1.9;max-width:520px;margin:0 auto .8rem;
+    padding:.7rem .9rem;border:1px solid var(--line);border-radius:6px;background:var(--ink-3);text-align:left;font-size:.93rem}
+  .quiz-result .qr-block b{color:var(--gold)}
+  .qr-meta{display:flex;flex-direction:column;gap:.35rem;align-items:center;margin:1rem 0 .2rem;
+    font-size:.86rem;color:var(--paper-dim)}
+  .qr-meta b{color:var(--gold-soft);font-weight:400}
+  .quiz-bar{height:3px;background:var(--ink-3);border-radius:2px;overflow:hidden;margin-bottom:.9rem}
+  .quiz-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+    transition:width .35s ease}
   .quiz-result .qr-sub b{color:var(--gold-soft)}
   .news-bar{max-width:1080px;margin:0 auto;padding:.55rem 1.2rem;
     border-bottom:1px solid var(--line);font-size:.88rem;color:var(--paper-dim);line-height:1.7}
@@ -780,7 +790,7 @@
       <div class="chap-head">
         <div class="chap-num">番 外</div>
         <h1 class="chap-title">문파 문답<span class="h">門派問答</span></h1>
-        <div class="chap-sub">여섯 가지 물음에 답하면, 그대에게 어울리는 문파를 점쳐준다.</div>
+        <div class="chap-sub">아홉 가지 물음에 답하면, 그대에게 어울리는 문파를 점쳐준다.</div>
         <div class="chap-divider"></div>
       </div>
       <div id="quizBox"></div>
@@ -1824,52 +1834,82 @@ function hideNotice(){
 /* ---- 문파 성향 테스트 ---- */
 const QUIZ=[
  {q:"그대에게 '강함'이란 무엇인가?", a:[
-   {t:"약한 이를 지킬 수 있는 의로운 힘", w:{"소림":2,"무당":1,"아미":1}},
-   {t:"이름 석 자에 실리는 명예와 위엄", w:{"남궁세가":2,"화산":1}},
-   {t:"싸우기 전에 이겨두는 지혜", w:{"제갈세가":2,"사천당가":1}},
-   {t:"천하를 꿇릴 압도적인 무력 그 자체", w:{"천마신교":2,"하북팽가":1}}]},
+   {t:"약한 이를 지킬 수 있는 의로운 힘", w:{"소림":3,"아미":2,"무당":1}},
+   {t:"이름 석 자에 실리는 명예와 위엄", w:{"남궁세가":3,"종남":2,"화산":1}},
+   {t:"싸우기 전에 이미 이겨두는 지혜", w:{"제갈세가":3,"모용세가":2,"사천당가":1}},
+   {t:"천하를 꿇릴 압도적인 무력 그 자체", w:{"천마신교":3,"하북팽가":1}}]},
+
  {q:"길에서 불의(不義)를 목격했다. 어찌하겠는가?", a:[
-   {t:"생각보다 검이 먼저 나간다", w:{"화산":2,"하북팽가":1}},
-   {t:"조용히 뒤를 밟아 확실하게 처리한다", w:{"사천당가":2,"제갈세가":1}},
-   {t:"티 나지 않게 약자를 빼돌려 돕는다", w:{"아미":2,"개방":1}},
-   {t:"강호의 일은 강호에 맡긴다. 내 갈 길을 간다", w:{"낭인":2,"사도련":1}}]},
+   {t:"생각보다 검이 먼저 나간다", w:{"화산":3,"하북팽가":1,"해남파":1}},
+   {t:"조용히 뒤를 밟아 확실하게 처리한다", w:{"사천당가":3,"점창":2,"하오문":1}},
+   {t:"티 나지 않게 약자를 빼돌려 돕는다", w:{"아미":3,"개방":2,"소림":1}},
+   {t:"강호의 일은 강호에 맡긴다. 내 길을 간다", w:{"낭인":3,"곤륜":2,"사도련":1}}]},
+
  {q:"수련은 어떻게 하는 편인가?", a:[
-   {t:"하루도 빠짐없이, 기본공을 천 번씩", w:{"소림":2,"무당":1}},
-   {t:"실전이 곧 수련. 일단 부딪친다", w:{"하북팽가":2,"사도련":1}},
-   {t:"원리를 파고들어 나만의 길을 찾는다", w:{"제갈세가":2,"무당":1}},
-   {t:"내키는 대로. 얽매이는 건 질색이다", w:{"개방":2,"낭인":1}}]},
+   {t:"하루도 빠짐없이, 기본공을 천 번씩", w:{"종남":3,"소림":2,"무당":1}},
+   {t:"실전이 곧 수련. 일단 부딪친다", w:{"하북팽가":3,"사도련":2,"해남파":1}},
+   {t:"원리를 파고들어 나만의 길을 찾는다", w:{"공동":3,"제갈세가":3,"무당":1}},
+   {t:"내키는 대로. 얽매이는 건 질색이다", w:{"개방":3,"낭인":2,"하오문":1}}]},
+
  {q:"손에 쥐고 싶은 것은?", a:[
-   {t:"한 자루의 검(劍)", w:{"무당":1,"화산":1,"남궁세가":1}},
-   {t:"묵직한 도(刀), 혹은 단련된 두 주먹", w:{"소림":1,"하북팽가":2}},
-   {t:"보이지 않는 암기와 독", w:{"사천당가":2,"천마신교":1}},
-   {t:"무기보다 사람과 정보", w:{"개방":2,"제갈세가":1}}]},
+   {t:"한 자루의 검(劍)", w:{"무당":3,"화산":2,"남궁세가":1,"종남":1}},
+   {t:"묵직한 도(刀), 혹은 단련된 두 주먹", w:{"소림":3,"하북팽가":1,"공동":1}},
+   {t:"보이지 않는 암기와 독", w:{"사천당가":3,"천마신교":1,"사도련":1}},
+   {t:"무기보다 사람과 정보", w:{"하오문":3,"제갈세가":2,"개방":1}}]},
+
+ {q:"싸움에서 그대가 믿는 것은?", a:[
+   {t:"눈으로 좇을 수 없는 속도", w:{"점창":3,"공동":2,"사천당가":1}},
+   {t:"바위도 쪼개는 한 방", w:{"남궁세가":3,"하북팽가":1,"해남파":1}},
+   {t:"상대의 힘을 흘려 되돌려주는 유(柔)", w:{"무당":3,"모용세가":2,"아미":1}},
+   {t:"끝없이 몰아치는 지구력", w:{"해남파":3,"종남":1,"개방":1}}]},
+
  {q:"어떤 무리에서 살고 싶은가?", a:[
-   {t:"법도와 규율이 바로 선 명문", w:{"소림":1,"남궁세가":2}},
-   {t:"오늘 만나 술 한잔이면 다 형제", w:{"개방":2,"낭인":1}},
-   {t:"실력이 곧 서열. 군말은 필요 없다", w:{"사도련":2,"천마신교":1}},
-   {t:"서로를 가족처럼 지키는 울타리", w:{"아미":2,"하북팽가":1}}]},
+   {t:"법도와 규율이 바로 선 명문", w:{"종남":3,"남궁세가":2,"소림":1}},
+   {t:"오늘 만나 술 한잔이면 다 형제", w:{"개방":3,"해남파":1,"낭인":1}},
+   {t:"실력이 곧 서열. 군말은 필요 없다", w:{"사도련":3,"천마신교":2,"하북팽가":1}},
+   {t:"서로를 가족처럼 지키는 울타리", w:{"아미":3,"모용세가":1,"사천당가":1}}]},
+
+ {q:"그대는 어디에서 살고 싶은가?", a:[
+   {t:"인적 끊긴 산정(山頂)의 고요", w:{"곤륜":3,"무당":1,"공동":1}},
+   {t:"사람 냄새 나는 저잣거리", w:{"하오문":3,"개방":1,"낭인":1}},
+   {t:"파도 소리 들리는 바닷가", w:{"해남파":3,"점창":1}},
+   {t:"권세와 부가 모이는 대저택", w:{"모용세가":3,"남궁세가":1,"제갈세가":1}}]},
+
+ {q:"세상이 그대를 알아주지 않는다면?", a:[
+   {t:"알아줄 필요 없다. 도(道)는 내 안에 있다", w:{"곤륜":3,"무당":1,"소림":1}},
+   {t:"언젠가 반드시 옛 영광을 되찾겠다", w:{"모용세가":3,"종남":2,"곤륜":1}},
+   {t:"힘으로 인정하게 만들면 그만이다", w:{"천마신교":3,"사도련":1,"하북팽가":1}},
+   {t:"내 방식대로, 남들과 다른 길을 판다", w:{"공동":3,"사천당가":2,"하오문":1}}]},
+
  {q:"강호행의 끝에서 그대는 무엇이 되고 싶은가?", a:[
-   {t:"이름 없는 이들이 기억하는 협객", w:{"화산":2,"개방":1,"아미":1}},
-   {t:"천하제일(天下第一)", w:{"천마신교":2,"하북팽가":1,"화산":1}},
-   {t:"바람처럼 자유로운 은거기인", w:{"무당":2,"낭인":1}},
-   {t:"부와 권세를 쥔 거물", w:{"남궁세가":1,"사도련":2,"사천당가":1}}]}
+   {t:"이름 없는 이들이 기억하는 협객", w:{"화산":3,"아미":1,"소림":1}},
+   {t:"천하제일(天下第一)", w:{"점창":3,"하북팽가":2,"천마신교":1,"화산":1}},
+   {t:"바람처럼 자유로운 은거기인", w:{"낭인":3,"곤륜":1,"무당":1}},
+   {t:"부와 권세를 쥔 거물", w:{"사도련":3,"하오문":2,"제갈세가":1}}]}
 ];
 const QUIZ_RESULT={
- "소림":{d:"그대의 심지는 태산처럼 굳다. 자비를 알되 물러섬이 없는 그대에게는 정종무학의 태산북두, 숭산의 고찰이 어울린다.",c:"jung"},
- "무당":{d:"흐르는 물처럼 다투지 않되 꺾이지도 않는다. 태극의 이치를 좇는 그대는 무당산의 도사가 될 상이다.",c:"jung"},
- "화산":{d:"불의를 보면 참지 못하는 뜨거운 심장. 매화처럼 오연한 그대의 검은 화산의 절벽 위에서 피어날 것이다.",c:"jung"},
- "아미":{d:"부드러움 속에 강철을 숨긴 사람. 약한 이를 지키는 그대의 손은 아미산의 안개처럼 우아하고 매섭다.",c:"jung"},
- "개방":{d:"천하가 그대의 집이요, 만인이 그대의 벗이다. 자유와 의리를 아는 그대는 타고난 개방도다.",c:"jung"},
- "남궁세가":{d:"하늘 아래 부끄러움 없는 당당함. 명예를 목숨보다 무겁게 여기는 그대는 제왕의 검가에 어울린다.",c:"jung"},
- "하북팽가":{d:"뒤를 돌아보지 않는 저돌성과 뜨거운 의리. 그대의 핏속에는 도왕(刀王)의 광풍이 흐른다.",c:"jung"},
- "사천당가":{d:"확실한 것만 믿는 치밀함. 그대의 한 수는 어둠 속에서 준비되어 단 한 번에 끝을 낸다.",c:"jung"},
- "제갈세가":{d:"백 수 앞을 내다보는 눈. 싸움은 검이 아니라 머리로 이기는 것임을 그대는 이미 알고 있다.",c:"jung"},
- "사도련":{d:"위선적인 명분보다 솔직한 힘의 논리. 약육강식의 강호에서 그대는 스스로의 규칙으로 살아간다.",c:"sa"},
- "천마신교":{d:"타협 없는 야망과 꺾이지 않는 신념. 마도천하(魔道天下)의 깃발 아래 그대의 이름이 새겨질 것이다.",c:"ma"},
- "낭인":{d:"어디에도 묶이지 않는 바람. 문파도 세가도 그대를 가둘 수 없다. 강호 그 자체가 그대의 소속이다.",c:"nang"}};
-let quizStep=0, quizScore={};
+ "소림":{d:"그대의 심지는 태산처럼 굳다. 자비를 알되 물러섬이 없는 그대에게는 정종무학의 태산북두, 숭산의 고찰이 어울린다.",c:"jung",art:"소림 72종 절예 · 금강불괴의 권",loc:"하남성 숭산"},
+ "무당":{d:"흐르는 물처럼 다투지 않되 꺾이지도 않는다. 태극의 이치를 좇는 그대는 무당산의 도사가 될 상이다.",c:"jung",art:"태극혜검 · 태극권",loc:"호북성 무당산"},
+ "화산":{d:"불의를 보면 참지 못하는 뜨거운 심장. 매화처럼 오연한 그대의 검은 화산의 절벽 위에서 피어날 것이다.",c:"jung",art:"이십사수매화검법 · 자하공",loc:"섬서성 화산"},
+ "아미":{d:"부드러움 속에 강철을 숨긴 사람. 약한 이를 지키는 그대의 손은 아미산의 안개처럼 우아하고 매섭다.",c:"jung",art:"불광보조 · 아미자",loc:"사천성 아미산"},
+ "개방":{d:"천하가 그대의 집이요, 만인이 그대의 벗이다. 자유와 의리를 아는 그대는 타고난 개방도다.",c:"jung",art:"타구봉법 · 항룡십팔장",loc:"하남성 개봉 총타"},
+ "곤륜":{d:"세상의 평판에 흔들리지 않는 고고함. 만년설에 묻힌 신선의 땅이 그대를 기다린다.",c:"jung",art:"운룡대팔식 · 태청강기",loc:"청해성 곤륜산"},
+ "공동":{d:"정해진 틀을 답답해하는 사람. 검이든 도든 창이든, 그대의 손에 잡히면 무기가 된다.",c:"jung",art:"칠상권 · 탈명서생탈",loc:"감숙성 공동산"},
+ "점창":{d:"물러섬을 모르는 속도. 한 번 뽑은 검은 상대의 숨통을 끊기 전엔 멈추지 않는다.",c:"jung",art:"사일검법 · 사선보",loc:"운남성 점창산"},
+ "종남":{d:"화려함보다 묵직함, 잔재주보다 정공법. 옛 영광을 되찾겠다는 그대의 집념이 종남의 검을 벼린다.",c:"jung",art:"천하삼십육검 · 가이신공",loc:"섬서성 종남산"},
+ "해남파":{d:"파도처럼 몰아치고 대양처럼 품는다. 육지의 좁은 규율은 그대에게 어울리지 않는다.",c:"jung",art:"남해폭풍검법 · 벽해조신공",loc:"해남섬"},
+ "남궁세가":{d:"하늘 아래 부끄러움 없는 당당함. 명예를 목숨보다 무겁게 여기는 그대는 제왕의 검가에 어울린다.",c:"jung",art:"창궁무애검법 · 제왕신공",loc:"안휘성 황산"},
+ "제갈세가":{d:"백 수 앞을 내다보는 눈. 싸움은 검이 아니라 머리로 이기는 것임을 그대는 이미 알고 있다.",c:"jung",art:"팔진도 · 소요유",loc:"호북성 융중"},
+ "하북팽가":{d:"뒤를 돌아보지 않는 저돌성과 뜨거운 의리. 그대의 핏속에는 도왕(刀王)의 광풍이 흐른다.",c:"jung",art:"오호단문도 · 혼원벽력공",loc:"하북성"},
+ "사천당가":{d:"확실한 것만 믿는 치밀함. 그대의 한 수는 어둠 속에서 준비되어 단 한 번에 끝을 낸다.",c:"jung",art:"만천화우 · 독공",loc:"사천성 성도"},
+ "모용세가":{d:"고결한 미소 뒤에 감춘 야망. 그대가 품은 뜻은 일개 무인의 것이 아니다.",c:"jung",art:"두전성전 · 모용검법",loc:"강남 소흥"},
+ "사도련":{d:"위선적인 명분보다 솔직한 힘의 논리. 약육강식의 강호에서 그대는 스스로의 규칙으로 살아간다.",c:"sa",art:"문파에 얽매이지 않는 실전 무공",loc:"중원 각지"},
+ "하오문":{d:"강호의 밑바닥에서 세상을 읽는 눈. 칼보다 돈과 정보가 무섭다는 걸 그대는 안다.",c:"sa",art:"잠행술 · 정보술",loc:"중원 저잣거리"},
+ "천마신교":{d:"타협 없는 야망과 꺾이지 않는 신념. 마도천하(魔道天下)의 깃발 아래 그대의 이름이 새겨질 것이다.",c:"ma",art:"천마신공 · 마공",loc:"신강 천산"},
+ "낭인":{d:"어디에도 묶이지 않는 바람. 문파도 세가도 그대를 가둘 수 없다. 강호 그 자체가 그대의 소속이다.",c:"nang",art:"스스로 익힌 잡학의 무공",loc:"정처 없음"}};
+let quizStep=0, quizScore={}, quizTop=[];
 function quizStart(){
-  quizStep=0; quizScore={};
+  quizStep=0; quizScore={}; quizTop=[];
   quizRender();
 }
 function quizPick(qi, ai){
@@ -1880,34 +1920,72 @@ function quizPick(qi, ai){
 }
 function quizRender(){
   const box=document.getElementById("quizBox");
+  if(!box) return;
   if(quizStep>=QUIZ.length){
-    const sorted=Object.keys(quizScore).sort(function(a,b){return quizScore[b]-quizScore[a];});
-    const top=sorted[0], second=sorted[1];
-    const r=QUIZ_RESULT[top]||{d:"",c:"nang"};
-    box.innerHTML='<div class="quiz-result">'
-      +'<div class="qr-label">그대에게 어울리는 곳은</div>'
-      +'<div class="qr-name">'+top+'</div>'
-      +'<div class="qr-desc">'+r.d+'</div>'
-      +(second?'<div class="qr-sub">차선의 길 : <b>'+second+'</b></div>':'')
+    const sorted=Object.keys(quizScore).sort(function(a,b){
+      if(quizScore[b]!==quizScore[a]) return quizScore[b]-quizScore[a];
+      return a.localeCompare(b,"ko");
+    });
+    const topScore=quizScore[sorted[0]];
+    const tied=sorted.filter(function(k){ return quizScore[k]===topScore; });
+    quizTop=tied;
+    const runners=sorted.filter(function(k){ return quizScore[k]<topScore; }).slice(0,2);
+    let head, body;
+    if(tied.length>1){
+      head='<div class="qr-label">그대는 두 길 사이에 섰다</div>'
+        +'<div class="qr-name">'+tied.slice(0,3).join(" · ")+'</div>'
+        +'<div class="qr-tie">어느 쪽도 그대에게 어울린다. 마음이 기우는 곳을 택하라.</div>';
+      body=tied.slice(0,3).map(function(k){
+        const r=QUIZ_RESULT[k]||{};
+        return '<div class="qr-block"><b>'+k+'</b> — '+(r.d||"")+'</div>';
+      }).join("");
+    }else{
+      const r=QUIZ_RESULT[tied[0]]||{};
+      head='<div class="qr-label">그대에게 어울리는 곳은</div>'
+        +'<div class="qr-name">'+tied[0]+'</div>';
+      body='<div class="qr-desc">'+(r.d||"")+'</div>'
+        +'<div class="qr-meta">'
+        +(r.loc?'<span>◈ 터전 : <b>'+r.loc+'</b></span>':'')
+        +(r.art?'<span>◈ 무공 : <b>'+r.art+'</b></span>':'')
+        +'</div>';
+    }
+    const sub=runners.length?'<div class="qr-sub">그대와 가까운 또 다른 길 : <b>'+runners.join("</b>, <b>")+'</b></div>':'';
+    box.innerHTML='<div class="quiz-result">'+head+body+sub
       +'<div class="btns" style="justify-content:center">'
-      +'<button class="btn" onclick="quizCopy()">결과 복사</button>'
+      +'<button class="btn" onclick="quizToMaker()">이 문파로 캐릭터 만들기</button>'
+      +'<button class="btn ghost" onclick="quizCopy()">결과 복사</button>'
       +'<button class="btn ghost" onclick="quizStart()">다시 묻기</button></div></div>';
     return;
   }
   const q=QUIZ[quizStep];
-  box.innerHTML='<div class="quiz-prog">'+(quizStep+1)+' / '+QUIZ.length+'</div>'
+  const pct=Math.round(quizStep/QUIZ.length*100);
+  box.innerHTML='<div class="quiz-bar"><span style="width:'+pct+'%"></span></div>'
+    +'<div class="quiz-prog">'+(quizStep+1)+' / '+QUIZ.length+'</div>'
     +'<div class="quiz-q">'+q.q+'</div>'
     +q.a.map(function(o,i){return '<button class="quiz-opt" onclick="quizPick('+quizStep+','+i+')">'+o.t+'</button>';}).join("");
 }
+function quizToMaker(){
+  const sect=(quizTop&&quizTop.length)?quizTop[0]:"";
+  showChapter("c-maker");
+  setTimeout(function(){
+    const g=document.getElementById("f_group");
+    if(g&&sect) g.value=sect;
+    const nm=document.getElementById("f_name");
+    if(nm) nm.focus();
+    toast(sect?("소속을 「"+sect+"」(으)로 채웠어요."):"캐릭터 생성으로 이동했어요.");
+  },80);
+}
 function quizCopy(){
-  const sorted=Object.keys(quizScore).sort(function(a,b){return quizScore[b]-quizScore[a];});
-  const txt="[무림강호 문파 문답]\n나에게 어울리는 문파는… 「"+sorted[0]+"」!\n"+(QUIZ_RESULT[sorted[0]]||{}).d
+  const t=(quizTop&&quizTop.length)?quizTop:[""];
+  const line=(t.length>1)
+    ? "나에게 어울리는 문파는… 「"+t.slice(0,3).join("」 그리고 「")+"」!"
+    : "나에게 어울리는 문파는… 「"+t[0]+"」!";
+  const txt="[무림강호 문파 문답]\n"+line+"\n"+((QUIZ_RESULT[t[0]]||{}).d||"")
     +"\n\n▶ 나도 해보기 : "+location.origin+location.pathname;
   navigator.clipboard.writeText(txt).then(function(){toast("결과를 복사했어요! 카톡에 붙여넣어 보세요.");})
     .catch(function(){toast("복사에 실패했어요.");});
 }
 
-/* ---- 관리 패널 (깃허브 직접 수정) ---- */
 const ADM_FIELDS = {
   characters: ["이름","별호","나이","성별","신장/체중","소속","경지","무공","외형","이미지","성격","특징","과거사","무기","선호/불호","한마디","비고","진영"],
   wanted: ["이름","별호","죄목","현상금","위험 등급","경지","소속","인상착의","행적","비고"]
