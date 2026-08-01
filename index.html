@@ -141,7 +141,7 @@
   nav.tabs button:hover{color:var(--paper)}
   nav.tabs button.active{color:var(--gold); border-bottom-color:var(--gold)}
 
-  main{max-width:820px; margin:0 auto; padding:3.5rem 1.4rem 8rem}
+  main{max-width:760px; margin:0 auto; padding:3.5rem 1.4rem 8rem}
   .chapter{display:none; animation:chapIn .6s ease both}
   .chapter.active{display:block}
   @keyframes chapIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -381,7 +381,7 @@
   .gloss-item{padding:.7em .2em;border-bottom:1px dashed rgba(44,47,55,.7)}
   .gterm{font-weight:700;color:var(--paper)}
   .ghan{color:var(--gold-soft);font-size:.82em;margin-left:.5em}
-  .gdef{color:#cfc7b2;font-size:.93rem;margin-top:.2em}
+  .gdef{color:#cfc7b2;font-size:1rem;margin-top:.25em}
   .wanted-card{border-color:rgba(169,58,52,.55)}
   .wanted-card>summary{border-left:3px solid var(--crimson)}
   .wanted-card>summary .who{display:flex;flex-direction:column;gap:.15rem;text-align:left}
@@ -469,15 +469,30 @@
   .quiz-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft));
     transition:width .35s ease}
   .quiz-result .qr-sub b{color:var(--gold-soft)}
-  .news-bar{max-width:1080px;margin:0 auto;padding:.55rem 1.2rem;
+  .news-bar{max-width:1080px;margin:0 auto;padding:0 1.2rem;
     border-bottom:1px solid var(--line);font-size:.88rem;color:var(--paper-dim);line-height:1.7}
+  .news-toggle{display:flex;align-items:center;gap:.6em;width:100%;padding:.5rem 0;
+    background:none;border:none;cursor:pointer;font-family:var(--serif);font-size:.85rem;
+    color:var(--paper-dim);text-align:left;min-height:40px}
+  .news-toggle:hover{color:var(--paper)}
+  .news-brief{flex:1;min-width:0;display:flex;align-items:center;gap:.5em;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .news-brief #briefWeather{flex-shrink:0;color:var(--gold-soft)}
+  .news-brief #briefNews{overflow:hidden;text-overflow:ellipsis;font-style:italic}
+  .news-dot{flex-shrink:0;opacity:.5}
+  .news-arrow{flex-shrink:0;color:var(--gold);font-size:.75rem;transition:transform .25s ease}
+  .news-bar:not(.collapsed) .news-arrow{transform:rotate(180deg)}
+  .news-full{overflow:hidden;max-height:0;transition:max-height .3s ease,opacity .25s ease,padding .25s ease;opacity:0;padding-bottom:0}
+  .news-bar:not(.collapsed) .news-full{max-height:320px;opacity:1;padding-bottom:.55rem}
+  .news-bar:not(.collapsed) .news-brief{opacity:.45}
+  @media (prefers-reduced-motion: reduce){ .news-full{transition:none} }
   .news-bar[hidden]{display:none}
   .news-row{display:flex;align-items:baseline;gap:.8em;padding:.12rem 0}
   .news-label{flex-shrink:0;color:var(--gold);font-size:.72rem;letter-spacing:.25em;border:1px solid rgba(201,162,75,.4);
     border-radius:2px;padding:.15em .6em;white-space:nowrap;min-width:7.2em;text-align:center}
   #newsText{font-style:italic}
   #weatherText b{color:var(--gold-soft);font-weight:700}
-  @media(max-width:620px){ .news-row{flex-direction:column;gap:.15em} .news-label{min-width:0;align-self:flex-start} }
+  @media(max-width:620px){ .news-row{flex-direction:column;gap:.15em} .news-label{min-width:0;align-self:flex-start} .news-toggle{font-size:.8rem} }
   .img-attach{display:flex;align-items:center;gap:.7em;flex-wrap:wrap}
   .img-attach-prev{max-width:140px;max-height:140px;border-radius:6px;border:1px solid var(--line);margin-top:.5rem;display:block}
   .roster-img{max-width:200px;max-height:260px;border-radius:6px;border:1px solid var(--line);display:block;margin:0 auto 1rem;box-shadow:0 6px 20px rgba(0,0,0,.4)}
@@ -500,6 +515,23 @@
   @media (prefers-reduced-motion: reduce){
     #cover *{animation-duration:.01s !important; animation-delay:0s !important}
     .mist{animation:none !important}
+  }
+  /* 스와이프 전환 */
+  .chapter.slide-in-left{animation:slideInLeft .32s cubic-bezier(.2,.7,.2,1) both}
+  .chapter.slide-in-right{animation:slideInRight .32s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes slideInLeft{from{opacity:0;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes slideInRight{from{opacity:0;transform:translateX(-28px)}to{opacity:1;transform:translateX(0)}}
+  .swipe-hint{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%) translateY(12px);
+    background:rgba(11,12,14,.92);border:1px solid var(--line);border-radius:20px;
+    padding:.5em 1.1em;font-size:.78rem;color:var(--paper-dim);letter-spacing:.05em;
+    opacity:0;pointer-events:none;transition:all .35s ease;z-index:120}
+  .swipe-hint.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .swipe-edge{position:fixed;top:50%;transform:translateY(-50%);z-index:110;pointer-events:none;
+    font-size:1.6rem;color:var(--gold);opacity:0;transition:opacity .2s ease}
+  .swipe-edge.l{left:.6rem} .swipe-edge.r{right:.6rem}
+  .swipe-edge.on{opacity:.55}
+  @media (prefers-reduced-motion: reduce){
+    .chapter.slide-in-left,.chapter.slide-in-right{animation-duration:.01s !important}
   }
 </style>
 <script type="application/ld+json">
@@ -556,8 +588,14 @@
     <button class="nb-x" onclick="hideNotice()" title="닫기">✕</button>
   </div>
   <div id="newsBar" class="news-bar" hidden>
-    <div class="news-row"><span class="news-label">오늘의 날씨</span><span id="weatherText"></span></div>
-    <div class="news-row"><span class="news-label">강호 소식</span><span id="newsText"></span></div>
+    <button class="news-toggle" id="newsToggle" onclick="toggleNews()" aria-expanded="true">
+      <span class="news-brief"><span id="briefWeather"></span><span class="news-dot">·</span><span id="briefNews"></span></span>
+      <span class="news-arrow">▾</span>
+    </button>
+    <div class="news-full">
+      <div class="news-row"><span class="news-label">오늘의 날씨</span><span id="weatherText"></span></div>
+      <div class="news-row"><span class="news-label">강호 소식</span><span id="newsText"></span></div>
+    </div>
   </div>
 
   <main id="main">
@@ -883,7 +921,7 @@
               <span id="imgAttachName" class="hint" style="margin:0">선택 안 함</span>
               <button type="button" id="imgAttachDel" class="btn ghost" style="padding:.3em .8em;font-size:.8rem;display:none" onclick="applyImageClear()">✕ 제거</button>
             </div>
-            <img id="imgAttachPrev" class="img-attach-prev" hidden>
+            <img id="imgAttachPrev" class="img-attach-prev" alt="첨부한 캐릭터 이미지 미리보기" hidden>
             <div class="hint">선택 사항. [신청하기]로 접수할 때 함께 전송돼요. (자동으로 용량을 줄여 보냅니다)</div>
           </div>
           <div class="field">
@@ -1035,6 +1073,10 @@
     <div id="adminMsg"></div>
   </div>
 </div>
+
+<div class="swipe-edge l" id="swipeL">‹</div>
+<div class="swipe-edge r" id="swipeR">›</div>
+<div class="swipe-hint" id="swipeHint"></div>
 
 <div class="toast" id="toast"></div>
 
@@ -1807,11 +1849,29 @@ function todaysRumor(){
   const day=Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())/86400000);
   return RUMORS[day % RUMORS.length];
 }
+function toggleNews(){
+  const bar=document.getElementById("newsBar");
+  const open=bar.classList.toggle("collapsed")===false;
+  document.getElementById("newsToggle").setAttribute("aria-expanded", open?"true":"false");
+  try{ localStorage.setItem("gangho_news_open", open?"1":"0"); }catch(e){}
+}
 function showNews(txt){
   const w=todaysWeather();
   document.getElementById("weatherText").innerHTML=w.icon+" <b>"+w.name+"</b> — "+w.flavor;
   document.getElementById("newsText").textContent=txt;
-  document.getElementById("newsBar").hidden=false;
+  // 접힌 상태용 한 줄 요약
+  const bw=document.getElementById("briefWeather");
+  const bn=document.getElementById("briefNews");
+  if(bw) bw.textContent=w.icon+" "+w.name;
+  if(bn) bn.textContent=txt;
+  const bar=document.getElementById("newsBar");
+  bar.hidden=false;
+  // 저장된 선호 상태 복원 (기본: 접힘)
+  let open="1";
+  try{ const v=localStorage.getItem("gangho_news_open"); if(v==="0"||v==="1") open=v; }catch(e){}
+  bar.classList.toggle("collapsed", open!=="1");
+  const tg=document.getElementById("newsToggle");
+  if(tg) tg.setAttribute("aria-expanded", open==="1"?"true":"false");
 }
 
 /* ---- 공지 배너 ---- */
@@ -2267,6 +2327,109 @@ async function adminDelete(i){
     admMsg("삭제 실패: "+e.message, false);
   }
 }
+
+/* ---- 모바일 스와이프로 장 넘기기 ---- */
+(function(){
+  const MIN_DIST=55;        // 최소 가로 이동
+  const MAX_OFF=45;         // 허용 세로 흔들림
+  const MAX_TIME=600;       // 최대 시간(ms)
+  let sx=0, sy=0, st=0, tracking=false;
+
+  function chapterIds(){
+    return CHAPTERS.map(function(c){ return c.id; });
+  }
+  function currentIndex(){
+    const cur=document.querySelector(".chapter.active");
+    return cur ? chapterIds().indexOf(cur.id) : -1;
+  }
+  // 가로로 스크롤되는 영역(탭바·표·지도 등) 위에서는 스와이프 무시
+  function inScrollable(el){
+    while(el && el!==document.body){
+      if(el.nodeType===1){
+        if(el.closest && el.closest("#cover, .admin-overlay, .mapwrap")) return true;
+        const cs=getComputedStyle(el);
+        if((cs.overflowX==="auto"||cs.overflowX==="scroll") && el.scrollWidth>el.clientWidth+2) return true;
+        const t=el.tagName;
+        if(t==="INPUT"||t==="TEXTAREA"||t==="SELECT"||t==="BUTTON"||t==="A"||t==="SUMMARY") return true;
+      }
+      el=el.parentNode;
+    }
+    return false;
+  }
+  function showHint(text){
+    const el=document.getElementById("swipeHint");
+    if(!el) return;
+    el.textContent=text;
+    el.classList.add("show");
+    clearTimeout(el._t);
+    el._t=setTimeout(function(){ el.classList.remove("show"); }, 1100);
+  }
+  function edge(side,on){
+    const el=document.getElementById(side==="l"?"swipeL":"swipeR");
+    if(el) el.classList.toggle("on", !!on);
+  }
+  function go(dir){   // dir: 1=다음, -1=이전
+    const ids=chapterIds();
+    const i=currentIndex();
+    if(i<0) return;
+    const n=i+dir;
+    if(n<0){ showHint("첫 장입니다"); return; }
+    if(n>=ids.length){ showHint("마지막 장입니다"); return; }
+    showChapter(ids[n]);
+    const sec=document.getElementById(ids[n]);
+    if(sec){
+      sec.classList.remove("slide-in-left","slide-in-right");
+      void sec.offsetWidth;
+      sec.classList.add(dir>0?"slide-in-left":"slide-in-right");
+      setTimeout(function(){ sec.classList.remove("slide-in-left","slide-in-right"); }, 400);
+    }
+    const label=(CHAPTERS[n]||{}).label||"";
+    showHint((dir>0?"▷ ":"◁ ")+label);
+  }
+
+  document.addEventListener("touchstart", function(e){
+    if(e.touches.length!==1){ tracking=false; return; }
+    const t=e.touches[0];
+    if(inScrollable(e.target)){ tracking=false; return; }
+    if(document.getElementById("cover") && !document.getElementById("cover").classList.contains("gone")){ tracking=false; return; }
+    sx=t.clientX; sy=t.clientY; st=Date.now(); tracking=true;
+  }, {passive:true});
+
+  document.addEventListener("touchmove", function(e){
+    if(!tracking||e.touches.length!==1) return;
+    const t=e.touches[0];
+    const dx=t.clientX-sx, dy=t.clientY-sy;
+    if(Math.abs(dx)>30 && Math.abs(dy)<MAX_OFF){
+      edge(dx>0?"l":"r", true);
+    }else{
+      edge("l",false); edge("r",false);
+    }
+  }, {passive:true});
+
+  document.addEventListener("touchend", function(e){
+    edge("l",false); edge("r",false);
+    if(!tracking) return;
+    tracking=false;
+    const t=(e.changedTouches&&e.changedTouches[0]);
+    if(!t) return;
+    const dx=t.clientX-sx, dy=t.clientY-sy, dt=Date.now()-st;
+    if(dt>MAX_TIME) return;
+    if(Math.abs(dx)<MIN_DIST) return;
+    if(Math.abs(dy)>MAX_OFF) return;
+    go(dx<0?1:-1);   // 왼쪽으로 밀면 다음 장
+  }, {passive:true});
+
+  // 데스크톱: 좌우 방향키로도 이동
+  document.addEventListener("keydown", function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const cover=document.getElementById("cover");
+    if(cover && !cover.classList.contains("gone")) return;
+    const panel=document.getElementById("adminPanel");
+    if(panel && !panel.hidden) return;
+    if(e.key==="ArrowRight") go(1);
+    else if(e.key==="ArrowLeft") go(-1);
+  });
+})();
 
 /* 초기 */
 // 이번 접속에서 표지를 이미 봤다면 애니메이션 생략
