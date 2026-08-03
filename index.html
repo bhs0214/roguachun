@@ -377,8 +377,24 @@
   .gloss-search{margin-bottom:1.2rem}
   .gloss-search input{width:100%;font-family:var(--serif);font-size:1rem;color:var(--paper);background:var(--ink-2);border:1px solid var(--line);border-radius:5px;padding:.7em .9em}
   .gloss-search input:focus{outline:none;border-color:var(--gold)}
-  .gloss-cat{color:var(--gold);letter-spacing:.2em;margin:2.2rem 0 .6rem;text-align:center;font-size:1.05rem}
-  .gloss-item{padding:.7em .2em;border-bottom:1px dashed rgba(44,47,55,.7)}
+  .gloss-tools{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+  .gloss-count{font-size:.8rem;color:var(--paper-dim);letter-spacing:.05em}
+  .gloss-actions{margin-left:auto;display:flex;gap:.4rem}
+  .gloss-btn{padding:.35em .9em;font-size:.8rem}
+  .gloss-group{border:1px solid var(--line);border-radius:8px;background:var(--ink-2);margin:.6rem 0;overflow:hidden}
+  .gloss-cat{display:flex;align-items:center;gap:.6rem;list-style:none;cursor:pointer;
+    padding:.85rem 1.1rem;color:var(--gold);letter-spacing:.12em;font-size:1rem;
+    margin:0;text-align:left;transition:background .2s;min-height:44px}
+  .gloss-cat::-webkit-details-marker{display:none}
+  .gloss-cat:hover{background:var(--ink-3)}
+  .gloss-cat .gmk{font-size:.75rem;transition:transform .25s ease;flex-shrink:0}
+  .gloss-group[open] .gloss-cat .gmk{transform:rotate(90deg)}
+  .gcat-name{flex:1}
+  .gcount{font-size:.75rem;color:var(--paper-dim);letter-spacing:.05em;border:1px solid var(--line);
+    border-radius:20px;padding:.15em .7em;flex-shrink:0}
+  .gloss-body{padding:0 1.1rem 1rem;border-top:1px solid var(--line)}
+  .gloss-item{padding:.7em .1em;border-bottom:1px dashed rgba(44,47,55,.7)}
+  .gloss-item:last-child{border-bottom:none}
   .gterm{font-weight:700;color:var(--paper)}
   .ghan{color:var(--gold-soft);font-size:.82em;margin-left:.5em}
   .gdef{color:#cfc7b2;font-size:1rem;margin-top:.25em}
@@ -782,6 +798,13 @@
         <div class="chap-divider"></div>
       </div>
       <div class="gloss-search"><input id="glossSearch" placeholder="용어 검색 (예: 내공, 주화입마, 점소이)" oninput="renderGloss(this.value)"></div>
+      <div class="gloss-tools" id="glossTools">
+        <span class="gloss-count" id="glossCount"></span>
+        <span class="gloss-actions">
+          <button class="btn ghost gloss-btn" onclick="glossAll(true)">모두 펼치기</button>
+          <button class="btn ghost gloss-btn" onclick="glossAll(false)">모두 접기</button>
+        </span>
+      </div>
       <div id="glossList"></div>
 
       <h4 style="color:var(--gold);text-align:center;margin:3rem 0 .4rem;letter-spacing:.2em">═ 강호 물가표(江湖物價表) ═</h4>
@@ -1618,17 +1641,41 @@ const GLOSS=[
  {c:"호칭과 신분",t:"소협 / 대협",h:"少俠 / 大俠",d:"젊은 협객, 그리고 이름 높은 협객에 대한 존칭."},
  {c:"호칭과 신분",t:"별호",h:"別號",d:"강호에서 불리는 또 다른 이름. 명성이 쌓이면 자연히 붙는다."}
 ];
+let glossOpen={};   // 분류별 펼침 상태 기억
+try{ glossOpen=JSON.parse(localStorage.getItem("gangho_gloss_open")||"{}"); }catch(e){ glossOpen={}; }
+function toggleGlossCat(cat, el){
+  glossOpen[cat]=el.open;
+  try{ localStorage.setItem("gangho_gloss_open", JSON.stringify(glossOpen)); }catch(e){}
+}
+function glossAll(open){
+  document.querySelectorAll("#glossList details.gloss-group").forEach(function(d){
+    d.open=open; glossOpen[d.dataset.cat]=open;
+  });
+  try{ localStorage.setItem("gangho_gloss_open", JSON.stringify(glossOpen)); }catch(e){}
+}
 function renderGloss(q){
   q=(q||"").trim().toLowerCase();
   const box=document.getElementById("glossList");
   const cats=[...new Set(GLOSS.map(g=>g.c))];
-  let out="";
+  let out="", total=0;
   cats.forEach(cat=>{
     const items=GLOSS.filter(g=>g.c===cat&&(!q||(g.t+g.h+g.d).toLowerCase().includes(q)));
     if(!items.length)return;
-    out+='<h4 class="gloss-cat">═ '+cat+' ═</h4>'+items.map(g=>
-      '<div class="gloss-item"><span class="gterm">'+g.t+'</span><span class="ghan">'+g.h+'</span><div class="gdef">'+g.d+'</div></div>').join("");
+    total+=items.length;
+    // 검색 중에는 항상 펼침, 아니면 저장된 상태(기본 펼침)
+    const isOpen = q ? true : (glossOpen[cat]!==false);
+    out+='<details class="gloss-group" data-cat="'+escapeHtml(cat)+'"'+(isOpen?' open':'')
+      +' ontoggle="toggleGlossCat(\''+cat.replace(/'/g,"\\'")+'\', this)">'
+      +'<summary class="gloss-cat"><span class="gmk">▶</span><span class="gcat-name">'+cat+'</span>'
+      +'<span class="gcount">'+items.length+'</span></summary>'
+      +'<div class="gloss-body">'+items.map(g=>
+        '<div class="gloss-item"><span class="gterm">'+g.t+'</span><span class="ghan">'+g.h+'</span><div class="gdef">'+g.d+'</div></div>').join("")
+      +'</div></details>';
   });
+  const bar=document.getElementById("glossTools");
+  if(bar) bar.style.display = out ? "" : "none";
+  const cnt=document.getElementById("glossCount");
+  if(cnt) cnt.textContent = q ? (total+"개 찾음") : (GLOSS.length+"개 수록");
   box.innerHTML=out||'<div class="empty" style="text-align:center">검색 결과가 없습니다.</div>';
 }
 
