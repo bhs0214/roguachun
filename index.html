@@ -533,6 +533,11 @@
   @media (prefers-reduced-motion: reduce){
     .chapter.slide-in-left,.chapter.slide-in-right{animation-duration:.01s !important}
   }
+  .pf-link{color:var(--gold);text-decoration:underline;text-underline-offset:3px;
+    word-break:break-all;transition:color .2s}
+  .pf-link:hover{color:var(--gold-soft)}
+  .pf-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:2px}
+  .pf-link::after{content:" ↗";font-size:.85em;opacity:.7;text-decoration:none}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite",
@@ -569,7 +574,7 @@
       무협을 처음 접하는 분도 관리진의 도움을 받아 참여할 수 있으며, 신규 참가자를 모집하고 있습니다.</p>
     </div>
     <div class="seal">天勢熙</div>
-    <div class="made">made by. 天勢熙</div>
+    <div class="made">made by. 天勢熙 &nbsp;·&nbsp; 사이트 제작 밤바다</div>
     <div><button class="enter" onclick="enterSite()">다음 장으로 <span class="arrow">→</span></button></div>
   </div>
 </div>
@@ -1420,6 +1425,18 @@ function delChar(i){
   if(!confirm("이 캐릭터를 삭제할까요?")) return;
   const arr=loadStore(); arr.splice(i,1); saveStore(arr); renderSaved(); toast("삭제했어요.");
 }
+// 글 속의 주소를 클릭 가능한 링크로 (http/https/www 만 허용 — 안전)
+function linkify(s){
+  var esc=escapeHtml(String(s));
+  return esc.replace(/(https?:\/\/|www\.)[^\s<>"']+/gi, function(m){
+    var url=m, tail="";
+    var t=url.match(/[).,!?\]]+$/);
+    if(t){ tail=t[0]; url=url.slice(0, url.length-tail.length); }
+    if(!url) return m;
+    var href=(/^www\./i.test(url)) ? ("https://"+url) : url;
+    return '<a class="pf-link" href="'+href+'" target="_blank" rel="noopener noreferrer">'+url+'</a>'+tail;
+  });
+}
 function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 
 /* ---- 토스트 ---- */
@@ -1453,7 +1470,7 @@ function rosterCard(c){
   const grp=escapeHtml(c["소속"]||"낭인");
   const lvl=escapeHtml(c["경지"]||"-");
   const rows=ROSTER_ORDER.filter(k=>c[k]&&k!=="이름"&&k!=="이미지").map(k=>
-    `<div class="roster-field"><span class="fk">${k}</span><span class="fv">${escapeHtml(String(c[k]))}</span></div>`).join("");
+    `<div class="roster-field"><span class="fk">${k}</span><span class="fv">${linkify(c[k])}</span></div>`).join("");
   return `<details class="accordion roster-card ${factionClass(c)}">
     <summary><span class="mk">▶</span><span class="who">${name}${alias}</span>
     <span class="meta"><span class="badge">${grp}</span><span class="badge">${lvl}</span></span></summary>
@@ -1624,7 +1641,7 @@ function wantedCard(c){
   const bounty=escapeHtml(c["현상금"]||"현상금 미정");
   const danger=escapeHtml(c["위험 등급"]||c["경지"]||"-");
   const rows=WANTED_ORDER.filter(k=>c[k]&&k!=="이름"&&k!=="별호").map(k=>
-    '<div class="roster-field"><span class="fk">'+k+'</span><span class="fv">'+escapeHtml(String(c[k]))+'</span></div>').join("");
+    '<div class="roster-field"><span class="fk">'+k+'</span><span class="fv">'+linkify(c[k])+'</span></div>').join("");
   return '<details class="accordion wanted-card">'
     +'<summary><span class="mk">▶</span><span class="who">'+name+alias+'</span>'
     +'<span class="meta"><span class="badge bounty">'+bounty+'</span><span class="badge danger">'+danger+'</span></span></summary>'
