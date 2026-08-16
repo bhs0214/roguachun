@@ -919,7 +919,7 @@
             <datalist id="groups">
               <option>무림맹</option><option>개방</option><option>소림</option><option>무당</option><option>곤륜</option><option>공동</option><option>아미</option><option>점창</option><option>종남</option><option>화산</option><option>해남</option>
               <option>제갈세가</option><option>남궁세가</option><option>하북팽가</option><option>사천당가</option><option>모용세가</option>
-              <option>사도련</option><option>장강수로채</option><option>녹림십팔채</option><option>하오문</option>
+              <option>사도련</option><option>장강수로채</option><option>녹림십팔채</option><option>하오문</option><option>기루</option>
               <option>천마신교</option><option>혈교</option><option>일월신교</option><option>낭인</option>
             </datalist>
             <div class="hint">문파·세가 창작 시 관리진 상의 후 자유 입력 가능</div>
@@ -1480,9 +1480,9 @@ function factionClass(c){
   if(f==="마") return "f-ma";
   if(f==="낭인") return "f-nang";
   const g=(c["소속"]||"");
-  if(/천마신교|마교|혈교|일월신교/.test(g)) return "f-ma";
-  if(/사도련|하오문|녹림|장강|수로채/.test(g)) return "f-sa";
-  if(/낭인/.test(g)) return "f-nang";
+  if(/천마신교|마교|혈교|일월신교|배화교|명교/.test(g)) return "f-ma";
+  if(/사파|흑도|사도련|하오문|녹림|장강|수로채|기루|기녀|기방|루주/.test(g)) return "f-sa";
+  if(/낭인|무소속/.test(g)) return "f-nang";
   if(g) return "f-jung";
   return "f-nang";
 }
@@ -1514,7 +1514,8 @@ function normGroup(c){
   const alias={"소림사":"소림","무당파":"무당","화산파":"화산","아미파":"아미","곤륜파":"곤륜",
     "공동파":"공동","점창파":"점창","종남파":"종남","해남":"해남파","개방파":"개방",
     "사천당문":"사천당가","당가":"사천당가","팽가":"하북팽가","남궁가":"남궁세가",
-    "천마신교":"천마신교","마교":"천마신교","무림맹":"무림맹"};
+    "천마신교":"천마신교","마교":"천마신교","무림맹":"무림맹",
+    "흑도":"사파","기녀":"기루","루주":"기루","기방":"기루"};
   return alias[g]||g;
 }
 function renderSectBoard(){
