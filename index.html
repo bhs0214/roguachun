@@ -2246,6 +2246,62 @@ async function adminSaveNotice(){
   }catch(e){ admMsg("저장 실패: "+e.message, false); }
 }
 
+/* ---- 관리자: 이미지 파일 올리기 (저장소에 직접 업로드) ---- */
+function admImgSay(msg, ok){
+  const el=document.getElementById("admImgStatus");
+  if(el){ el.textContent=msg||""; el.style.color = ok===false ? "#e08a84" : "var(--paper-dim)"; }
+}
+function adminImageClear(){
+  const inp=document.getElementById("admf_이미지");
+  if(inp) inp.value="";
+  const pv=document.getElementById("admImgPrev");
+  if(pv){ pv.hidden=true; pv.removeAttribute("src"); }
+  const f=document.getElementById("admImgFile");
+  if(f) f.value="";
+  admImgSay("이미지를 없앴습니다. [저장]을 눌러 반영하세요.");
+}
+function adminImagePick(input){
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)){ admImgSay("이미지 파일만 올릴 수 있어요.", false); input.value=""; return; }
+  if(!ADM.token){ admImgSay("먼저 관리 패널에 로그인해주세요.", false); return; }
+  admImgSay("이미지를 줄이는 중...");
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=async function(){
+      try{
+        const MAX=700;
+        let w=img.width, h=img.height;
+        if(w>MAX||h>MAX){ const r=Math.min(MAX/w, MAX/h); w=Math.round(w*r); h=Math.round(h*r); }
+        const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        cv.getContext("2d").drawImage(img,0,0,w,h);
+        const dataUrl=cv.toDataURL("image/jpeg",0.85);
+        const b64=dataUrl.split(",")[1];
+        // 저장소에 올릴 경로
+        const nameInput=document.getElementById("admf_이름");
+        const who=((nameInput&&nameInput.value)||"무명").replace(/[^가-힣一-龥a-zA-Z0-9]/g,"").slice(0,20)||"무명";
+        const path="images/"+who+"_"+Date.now()+".jpg";
+        admImgSay("깃허브에 올리는 중...");
+        const body={ message:"이미지 업로드: "+path, content:b64, branch:ADM.branch };
+        await ghApi("/repos/"+ADM.owner+"/"+ADM.repo+"/contents/"+path, {
+          method:"PUT", body:JSON.stringify(body)
+        });
+        const inp=document.getElementById("admf_이미지");
+        if(inp) inp.value=path;
+        const pv=document.getElementById("admImgPrev");
+        if(pv){ pv.src=dataUrl; pv.hidden=false; }
+        admImgSay("올렸습니다! [저장]을 눌러 반영하세요.");
+      }catch(e){
+        admImgSay("실패: "+e.message, false);
+      }
+    };
+    img.onerror=function(){ admImgSay("이미지를 읽을 수 없어요.", false); };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 /* ---- 신청함 (관리자) ---- */
 let APPLY_ITEMS=[];
 function adminRenderApply(){
@@ -2329,6 +2385,16 @@ function adminFormHTML(c){
   return ADM_FIELDS[ADM.cur].map(function(k){
     const v=escapeHtml(String(c[k]||""));
     const id="admf_"+k.replace(/[^가-힣a-zA-Z]/g,"");
+    if(k==="이미지"){
+      return '<div class="field"><label>이미지 <span class="hint" style="margin:0">파일을 고르면 자동으로 올라갑니다</span></label>'
+        +'<input id="'+id+'" data-k="'+k+'" value="'+v+'" placeholder="이미지 주소 (직접 붙여넣어도 됩니다)">'
+        +'<input type="file" id="admImgFile" accept="image/*" hidden onchange="adminImagePick(this)">'
+        +'<div class="img-attach" style="margin-top:.5rem">'
+        +'<button type="button" class="btn ghost" style="padding:.45em 1.1em;font-size:.85rem" onclick="document.getElementById(\'admImgFile\').click()">🖼 이미지 파일 올리기</button>'
+        +'<button type="button" class="btn ghost" style="padding:.45em 1.1em;font-size:.85rem" onclick="adminImageClear()">✕ 이미지 없애기</button>'
+        +'<span id="admImgStatus" class="hint" style="margin:0"></span></div>'
+        +'<img id="admImgPrev" class="img-attach-prev" alt="이미지 미리보기"'+(c[k]?' src="'+v+'"':' hidden')+'></div>';
+    }
     if(ADM_LONG.has(k))
       return '<div class="field"><label>'+k+'</label><textarea id="'+id+'" data-k="'+k+'">'+v+'</textarea></div>';
     return '<div class="field"><label>'+k+'</label><input id="'+id+'" data-k="'+k+'" value="'+v+'"></div>';
