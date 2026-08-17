@@ -112,6 +112,16 @@
     transition:all .4s ease; opacity:0; animation:fadeSoft .55s 1.5s both;
   }
   .enter:hover{background:var(--gold); color:var(--ink); border-color:var(--gold); letter-spacing:.22em}
+  .cover-btns{display:flex; gap:.7rem; justify-content:center; flex-wrap:wrap}
+  a.enter{text-decoration:none}
+  .enter{line-height:1.2}
+  .enter-kakao{border-color:rgba(178,59,46,.55); color:var(--gold-soft); animation-delay:1.62s}
+  .enter-kakao:hover{background:var(--seal); color:#fff; border-color:var(--seal)}
+  .enter:focus-visible{outline:2px solid var(--gold); outline-offset:3px}
+  @media(max-width:620px){
+    .cover-btns{gap:.5rem}
+    .enter{padding:.8em 1.5em; font-size:.95rem}
+  }
   .enter .arrow{transition:transform .3s ease}
   .enter:hover .arrow{transform:translateX(4px)}
 
@@ -591,7 +601,10 @@
     </div>
     <div class="seal">天勢熙</div>
     <div class="made">made by. 天勢熙 &nbsp;·&nbsp; 사이트 제작 밤바다</div>
-    <div><button class="enter" onclick="enterSite()">다음 장으로 <span class="arrow">→</span></button></div>
+    <div class="cover-btns">
+      <button class="enter" onclick="enterSite()">다음 장으로 <span class="arrow">→</span></button>
+      <a class="enter enter-kakao" href="https://open.kakao.com/o/gAqWIZIi" target="_blank" rel="noopener noreferrer">오픈챗 입장 <span class="arrow">↗</span></a>
+    </div>
   </div>
 </div>
 
