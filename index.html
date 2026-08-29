@@ -1051,7 +1051,7 @@
       </div>
       <div id="sectBoard" class="sect-board" hidden></div>
       <div class="filter-bar">
-        <input id="rosterSearch" placeholder="이름 · 별호 · 소속 검색" oninput="rosterFilter.q=this.value;renderRoster()">
+        <input id="rosterSearch" placeholder="이름 · 별호 · 소속 · 오너 검색" oninput="rosterFilter.q=this.value;renderRoster()">
         <div class="chips">
           <button class="chip active" data-f="all" onclick="chipClick(this)">전체</button>
           <button class="chip" data-f="jung" onclick="chipClick(this)">정파</button>
@@ -1652,7 +1652,11 @@ function renderRoster(){
   if(rosterFilter.sect) arr=arr.filter(c=>normGroup(c)===rosterFilter.sect);
   if(rosterFilter.f!=="all") arr=arr.filter(c=>factionClass(c)==="f-"+rosterFilter.f);
   const q=(rosterFilter.q||"").trim().toLowerCase();
-  if(q) arr=arr.filter(c=>((c["이름"]||"")+(c["별호"]||"")+(c["소속"]||"")).toLowerCase().includes(q));
+  if(q) arr=arr.filter(function(c){
+    // 오너는 '공개'로 켠 경우에만 검색 대상에 포함
+    const own=(String(c["오너 공개"]||"").trim()==="공개") ? (c["오너"]||"") : "";
+    return ((c["이름"]||"")+(c["별호"]||"")+(c["소속"]||"")+own).toLowerCase().includes(q);
+  });
   cnt.textContent=arr.length+"명 / 전체 "+ROSTER_ITEMS.length+"명";
   renderSectBoard();
   const tot=document.getElementById("rosterTotal");
