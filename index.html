@@ -8,14 +8,14 @@
 <meta name="description" content="정통 무협 역극방 무림강호(武林江湖). 정파·사파·천마신교 세계관 설정집, 구파일방과 오대세가 소개, 캐릭터 생성기와 인명부, 강호 용어사전까지. 무협 롤플레이 신규 참가자 모집 중.">
 <meta name="keywords" content="무협 역극, 무협 역할극, 무림 롤플레이, 역극방, 무협 RP, 정파 사파 마교, 구파일방, 오대세가, 무림맹, 천마신교, 캐릭터 생성기, 무협 세계관, 롤플레이 모집">
 <meta name="author" content="天勢熙">
-<link rel="canonical" href="http://xn--939ax2xh6aq87d.site/">
+<link rel="canonical" href="https://xn--939ax2xh6aq87d.site/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="강호 江湖 · 무림강호">
 <meta property="og:description" content="관청의 법칙 바깥, 무인들의 별천지. 당신의 강호행(江湖行)에 무운을 빈다.">
-<meta property="og:image" content="http://xn--939ax2xh6aq87d.site/og.png">
+<meta property="og:image" content="https://xn--939ax2xh6aq87d.site/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="http://xn--939ax2xh6aq87d.site/">
+<meta property="og:url" content="https://xn--939ax2xh6aq87d.site/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚔️</text></svg>">
 <style>
@@ -463,6 +463,14 @@
   .chip:hover{color:var(--paper)}
   .chip.active{border-color:var(--gold);color:var(--gold)}
   .count{font-size:.78rem;color:var(--paper-dim);letter-spacing:.05em}
+  .sort-sel{font-family:var(--serif);font-size:.85rem;color:var(--paper);background:var(--ink-2);
+    border:1px solid var(--line);border-radius:20px;padding:.4em 1.7em .4em .9em;cursor:pointer;
+    min-height:34px;appearance:none;-webkit-appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,var(--gold) 50%),linear-gradient(135deg,var(--gold) 50%,transparent 50%);
+    background-position:calc(100% - 14px) center,calc(100% - 9px) center;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .sort-sel:hover{border-color:var(--gold)}
+  .sort-sel:focus{outline:none;border-color:var(--gold)}
   .notice-bar{display:flex;align-items:center;gap:.6em;max-width:1080px;margin:0 auto;padding:.7rem 1.2rem;
     border-bottom:1px solid rgba(201,162,75,.35);background:rgba(201,162,75,.08);color:var(--gold-soft);font-size:.92rem;line-height:1.6}
   .notice-bar[hidden]{display:none}
@@ -601,7 +609,7 @@
 {"@context":"https://schema.org","@type":"WebSite",
 "name":"무림강호(武林江湖) — 무협 역극방",
 "alternateName":"강호 江湖",
-"url":"http://xn--939ax2xh6aq87d.site/",
+"url":"https://xn--939ax2xh6aq87d.site/",
 "description":"정통 무협 역극방. 정파·사파·천마신교 세계관 설정집과 캐릭터 생성기, 인명부를 제공합니다.",
 "inLanguage":"ko"}
 </script>
@@ -852,6 +860,18 @@
       </div>
       <div id="glossList"></div>
 
+      <h4 style="color:var(--gold);text-align:center;margin:3rem 0 .4rem;letter-spacing:.2em">═ 객잔 메뉴판(客棧品書) ═</h4>
+      <p style="text-align:center;font-size:.85rem;color:var(--paper-dim);margin-bottom:1.2rem">객잔에 들어 무엇을 시킬지 고를 때 펴 보라.<br>고장마다 나는 것이 다르니, 사천에서 매운 것을 찾고 강남에서 생선을 청하라.</p>
+      <div class="gloss-search"><input id="menuSearch" placeholder="음식 · 술 · 차 검색 (예: 사천, 소흥주, 보이차)" oninput="renderMenu(this.value)"></div>
+      <div class="gloss-tools" id="menuTools">
+        <span class="gloss-count" id="menuCount"></span>
+        <span class="gloss-actions">
+          <button class="btn ghost gloss-btn" onclick="menuAll(true)">모두 펼치기</button>
+          <button class="btn ghost gloss-btn" onclick="menuAll(false)">모두 접기</button>
+        </span>
+      </div>
+      <div id="menuList"></div>
+
       <h4 style="color:var(--gold);text-align:center;margin:3rem 0 .4rem;letter-spacing:.2em">═ 강호 물가표(江湖物價表) ═</h4>
       <p style="text-align:center;font-size:.85rem;color:var(--paper-dim);margin-bottom:1.2rem">기준 환전 : 금 한 냥 = 은자 열 냥 = 전(錢) 일만 문(文)<br>시세는 지역과 시국에 따라 오르내리며, 전란 통에는 곱절로 뛴다.</p>
 
@@ -864,6 +884,13 @@
         <tr><td>소흥주 한 병</td><td>30문</td></tr>
         <tr><td>죽엽청 한 병</td><td>80문</td></tr>
         <tr><td>여아홍(명주) 한 병</td><td>은자 1냥</td></tr>
+        <tr><td>탁주 한 사발</td><td>3문</td></tr>
+        <tr><td>고량주(백주) 한 병</td><td>25문</td></tr>
+        <tr><td>차 한 주전자(보통)</td><td>5문</td></tr>
+        <tr><td>용정차 한 냥</td><td>은자 2냥</td></tr>
+        <tr><td>보이차 한 덩이(묵힌 것)</td><td>은자 10냥부터</td></tr>
+        <tr><td>사천 요리 한 상</td><td>80문</td></tr>
+        <tr><td>북경오리 한 마리</td><td>은자 2냥</td></tr>
         <tr><td>봉놋방(다인실) 하루</td><td>20문</td></tr>
         <tr><td>객방(일인실) 하루</td><td>100문</td></tr>
         <tr><td>상방(귀빈실) 하루</td><td>은자 1냥</td></tr>
@@ -1059,6 +1086,13 @@
           <button class="chip" data-f="ma" onclick="chipClick(this)">마교</button>
           <button class="chip" data-f="nang" onclick="chipClick(this)">낭인</button>
         </div>
+        <select id="rosterSort" class="sort-sel" onchange="rosterFilter.sort=this.value;saveRosterSort();renderRoster()" aria-label="정렬 방식">
+          <option value="reg">등재순</option>
+          <option value="name">이름순</option>
+          <option value="level">경지 높은순</option>
+          <option value="levelAsc">경지 낮은순</option>
+          <option value="recent">최근 등재순</option>
+        </select>
         <span id="rosterCount" class="count"></span>
         <button class="btn ghost" style="padding:.4em 1em;font-size:.85rem" onclick="loadRoster()">↻</button>
       </div>
@@ -1592,7 +1626,11 @@ function rosterCard(c){
     <div class="acc-body">${imgTag}${ownerTag}${rows||'<p class="empty">기재된 정보가 없습니다.</p>'}</div></details>`;
 }
 let ROSTER_ITEMS=[];
-let rosterFilter={q:"",f:"all",sect:""};
+let rosterFilter={q:"",f:"all",sect:"",sort:"reg"};
+try{
+  const sv=localStorage.getItem("gangho_roster_sort");
+  if(["reg","name","level","levelAsc","recent"].indexOf(sv)>-1) rosterFilter.sort=sv;
+}catch(e){}
 function chipClick(el){
   document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c===el));
   rosterFilter.f=el.dataset.f;
@@ -1640,6 +1678,47 @@ function sectPick(g){
   }
   renderRoster();
 }
+// 경지 서열 (높을수록 상위)
+const LEVEL_RANK={"삼류":1,"이류":2,"일류":3,"절정":4,"초절정":5,"화경":6,"현경":7,"생사경":8};
+function levelRank(c){
+  const s=String(c["경지"]||"");
+  let best=0;
+  for(const k in LEVEL_RANK){ if(s.indexOf(k)>-1 && LEVEL_RANK[k]>best) best=LEVEL_RANK[k]; }
+  return best;   // 미기재는 0
+}
+function sortRoster(arr){
+  const mode=rosterFilter.sort||"reg";
+  const idx=new Map();
+  ROSTER_ITEMS.forEach(function(c,i){ idx.set(c,i); });
+  const out=arr.slice();
+  function byName(a,b){
+    return String(a["이름"]||"").localeCompare(String(b["이름"]||""),"ko");
+  }
+  if(mode==="name"){ out.sort(byName); }
+  else if(mode==="level"){
+    out.sort(function(a,b){
+      const d=levelRank(b)-levelRank(a);
+      return d!==0?d:byName(a,b);
+    });
+  }
+  else if(mode==="levelAsc"){
+    out.sort(function(a,b){
+      const ra=levelRank(a), rb=levelRank(b);
+      if(ra===0&&rb!==0) return 1;      // 미기재는 항상 뒤로
+      if(rb===0&&ra!==0) return -1;
+      const d=ra-rb;
+      return d!==0?d:byName(a,b);
+    });
+  }
+  else if(mode==="recent"){
+    out.sort(function(a,b){ return idx.get(b)-idx.get(a); });
+  }
+  else { out.sort(function(a,b){ return idx.get(a)-idx.get(b); }); }
+  return out;
+}
+function saveRosterSort(){
+  try{ localStorage.setItem("gangho_roster_sort", rosterFilter.sort||"reg"); }catch(e){}
+}
 function renderRoster(){
   const box=document.getElementById("rosterList");
   const cnt=document.getElementById("rosterCount");
@@ -1657,6 +1736,7 @@ function renderRoster(){
     const own=(String(c["오너 공개"]||"").trim()==="공개") ? (c["오너"]||"") : "";
     return ((c["이름"]||"")+(c["별호"]||"")+(c["소속"]||"")+own).toLowerCase().includes(q);
   });
+  arr=sortRoster(arr);
   cnt.textContent=arr.length+"명 / 전체 "+ROSTER_ITEMS.length+"명";
   renderSectBoard();
   const tot=document.getElementById("rosterTotal");
@@ -1671,6 +1751,8 @@ async function loadRoster(){
     if(!r.ok) throw new Error("HTTP "+r.status);
     const data=await r.json();
     ROSTER_ITEMS=Array.isArray(data)?data:[];
+    const ss=document.getElementById("rosterSort");
+    if(ss) ss.value=rosterFilter.sort||"reg";
     renderRoster();
   }catch(e){
     ROSTER_ITEMS=[];
@@ -1799,6 +1881,84 @@ const GLOSS=[
  {c:"신물과 영약",t:"학우선",h:"鶴羽扇",d:"제갈세가가 드는 학의 깃털 부채. 지혜의 상징으로, 백색 의복과 함께 책사의 기품을 드러낸다."},
  {c:"신물과 영약",t:"마비산",h:"痲痺散",d:"술이나 음료에 타는 마비독. 가루 형태에 녹색을 띠나 희석하면 맛이 없어, 중독되면 최대 30분간 신체가 굳어버린다."}
 ];
+
+/* ---- 객잔 메뉴판 ---- */
+const MENU=[
+ {c:"면 · 주식",t:"소면",h:"素麵",d:"고기 없이 채소만 얹은 국수. 값이 가장 싸 주머니 가벼운 낭인이 즐겨 찾는다."},
+ {c:"면 · 주식",t:"우육면",h:"牛肉麵",d:"삶은 소고기를 큼직하게 얹은 국수. 객잔에서 배를 든든히 채우려는 무인의 첫 선택이다."},
+ {c:"면 · 주식",t:"도삭면",h:"刀削麵",d:"반죽 덩이를 칼로 깎아 끓는 물에 던져 넣는 면. 두툼하고 쫄깃해 산서(山西) 일대에서 이름났다."},
+ {c:"면 · 주식",t:"만두",h:"饅頭",d:"소를 넣지 않고 찐 밀떡. 중원에서 밥 대신 먹는 주식으로, 길 떠날 때 봇짐에 챙긴다."},
+ {c:"면 · 주식",t:"포자",h:"包子",d:"고기나 채소 소를 넣어 찐 만두. 뜨거울 때 먹어야 제맛이라 아침 저잣거리에서 김이 오른다."},
+ {c:"면 · 주식",t:"교자",h:"餃子",d:"초승달 모양으로 빚어 삶거나 지진 만두. 북방에서는 명절이면 온 식구가 둘러앉아 빚는다."},
+ {c:"면 · 주식",t:"죽",h:"粥",d:"쌀을 오래 끓여 무르게 한 것. 내상을 입어 속이 상한 이에게 의원이 권한다."},
+ {c:"면 · 주식",t:"전병",h:"煎餠",d:"기름에 부친 밀전병. 길 위에서 식어도 먹을 만해 표행 길의 요깃거리로 쓰인다."},
+ {c:"요리 · 북방",t:"북경오리",h:"北京烤鴨",d:"껍질이 바삭하도록 통째로 구운 오리. 얇은 전병에 파와 함께 싸 먹으며, 값이 비싸 잔치상에나 오른다."},
+ {c:"요리 · 북방",t:"양고기 구이",h:"烤羊肉",d:"불에 직접 구운 양고기. 북방과 새외에서 흔하며, 누린내를 잡으려 향신료를 넉넉히 뿌린다."},
+ {c:"요리 · 북방",t:"훠궈",h:"火鍋",d:"펄펄 끓는 육수에 고기와 채소를 데쳐 먹는 냄비 요리. 여럿이 둘러앉아 먹어 정을 나누기 좋다."},
+ {c:"요리 · 남방",t:"동파육",h:"東坡肉",d:"삼겹살을 간장에 오래 조려 젓가락으로도 갈라지는 요리. 강남 일대의 자랑이다."},
+ {c:"요리 · 남방",t:"서호초어",h:"西湖醋魚",d:"항주 서호에서 잡은 민물고기를 새콤한 초에 조린 것. 비린내 없이 담백하다."},
+ {c:"요리 · 남방",t:"청증어",h:"淸蒸魚",d:"생선을 통째로 쪄서 간장과 파를 얹은 요리. 재료가 신선해야만 낼 수 있어 객잔의 격을 가늠한다."},
+ {c:"요리 · 사천",t:"마파두부",h:"麻婆豆腐",d:"두부를 다진 고기와 함께 매콤하게 볶은 것. 혀가 얼얼한 화초(花椒)의 맛이 사천의 상징이다."},
+ {c:"요리 · 사천",t:"회과육",h:"回鍋肉",d:"삶은 돼지고기를 다시 볶아낸 요리. 기름지고 매워 술안주로 으뜸이다."},
+ {c:"요리 · 사천",t:"궁보계정",h:"宮保鷄丁",d:"닭고기와 땅콩을 말린 고추와 함께 볶은 것. 맵고 고소해 외지인도 즐겨 찾는다."},
+ {c:"요리 · 사천",t:"수자육편",h:"水煮肉片",d:"고기를 얇게 저며 매운 기름에 익힌 요리. 붉은 기름이 그릇을 덮어 보기만 해도 땀이 난다."},
+ {c:"술",t:"백주",h:"白酒",d:"수수를 증류해 빚은 맑고 독한 술. 도수가 높아 한 잔에도 취기가 오르며, 북방 무인들이 즐긴다."},
+ {c:"술",t:"황주",h:"黃酒",d:"곡식을 발효시킨 누런 술. 도수가 낮고 부드러워 데워 마시며, 오래 묵힐수록 값이 오른다."},
+ {c:"술",t:"소흥주",h:"紹興酒",d:"강남 소흥에서 빚는 황주의 으뜸. 은은한 단맛이 돌아 객잔에서 가장 흔히 나온다."},
+ {c:"술",t:"여아홍",h:"女兒紅",d:"딸을 낳은 해에 묻어두었다 시집갈 때 꺼내는 소흥주. 십수 년을 묵혀 값이 비싸고 귀하다."},
+ {c:"술",t:"죽엽청",h:"竹葉靑",d:"대나무 잎과 약재를 넣어 빚은 술. 푸른빛이 돌며 향이 맑아 문사와 도인이 즐겨 찾는다."},
+ {c:"술",t:"고량주",h:"高粱酒",d:"수수로 빚은 백주. 값이 싸고 독해 저잣거리 주막에서 가장 많이 팔린다."},
+ {c:"술",t:"탁주",h:"濁酒",d:"거르지 않아 뿌연 막걸리. 값이 헐해 짐꾼과 거지들의 벗이다."},
+ {c:"차",t:"녹차",h:"綠茶",d:"덖어 발효를 막은 찻잎. 맛이 맑고 쌉싸름해 더운 남방에서 즐겨 마신다."},
+ {c:"차",t:"용정차",h:"龍井茶",d:"항주 서호 부근에서 나는 녹차의 명품. 잎이 납작하고 향이 그윽해 귀인의 접대에 쓰인다."},
+ {c:"차",t:"백차",h:"白茶",d:"어린 싹을 그대로 말린 차. 빛이 옅고 맛이 순해 몸이 상한 이에게 권한다."},
+ {c:"차",t:"오룡차",h:"烏龍茶",d:"반쯤 발효시킨 차. 향이 짙고 뒷맛이 달아 복건과 광동에서 이름났다."},
+ {c:"차",t:"홍차",h:"紅茶",d:"완전히 발효시킨 차. 빛이 붉고 맛이 진해 추운 지방과 새외에서 즐긴다."},
+ {c:"차",t:"보이차",h:"普洱茶",d:"운남에서 나는 흑차. 묵힐수록 값이 올라 덩이째 거래되며, 기름진 음식 뒤에 마신다."},
+ {c:"차",t:"국화차",h:"菊花茶",d:"말린 국화를 우린 차. 열을 내린다 하여 여름철 객잔에서 흔히 낸다."}
+];
+let menuOpen={};
+try{ menuOpen=JSON.parse(localStorage.getItem("gangho_menu_open")||"{}"); }catch(e){ menuOpen={}; }
+let menuSearching=false;
+function toggleMenuCat(cat, el){
+  if(menuSearching) return;
+  menuOpen[cat]=el.open;
+  try{ localStorage.setItem("gangho_menu_open", JSON.stringify(menuOpen)); }catch(e){}
+}
+function menuAll(open){
+  document.querySelectorAll("#menuList details.gloss-group").forEach(function(d){
+    d.open=open; menuOpen[d.dataset.cat]=open;
+  });
+  try{ localStorage.setItem("gangho_menu_open", JSON.stringify(menuOpen)); }catch(e){}
+}
+function renderMenu(q){
+  q=(q||"").trim().toLowerCase();
+  menuSearching=!!q;
+  const box=document.getElementById("menuList");
+  if(!box) return;
+  const cats=[...new Set(MENU.map(g=>g.c))];
+  let out="", total=0;
+  cats.forEach(function(cat){
+    const items=MENU.filter(g=>g.c===cat&&(!q||(g.t+g.h+g.d).toLowerCase().includes(q)));
+    if(!items.length) return;
+    total+=items.length;
+    const isOpen = q ? true : (menuOpen[cat]!==false);
+    out+='<details class="gloss-group" data-cat="'+escapeHtml(cat)+'"'+(isOpen?" open":"")
+      +' ontoggle="toggleMenuCat(\''+cat.replace(/'/g,"\\'")+'\', this)">'
+      +'<summary class="gloss-cat"><span class="gmk">▶</span><span class="gcat-name">'+cat+'</span>'
+      +'<span class="gcount">'+items.length+'</span></summary>'
+      +'<div class="gloss-body">'+items.map(function(g){
+        return '<div class="gloss-item"><span class="gterm">'+g.t+'</span><span class="ghan">'+g.h+'</span>'
+          +'<div class="gdef">'+g.d+'</div></div>';
+      }).join("")+'</div></details>';
+  });
+  const bar=document.getElementById("menuTools");
+  if(bar) bar.style.display = out ? "" : "none";
+  const cnt=document.getElementById("menuCount");
+  if(cnt) cnt.textContent = q ? (total+"개 찾음") : (MENU.length+"품 수록");
+  box.innerHTML=out||'<div class="empty" style="text-align:center">찾는 것이 없습니다.</div>';
+  setTimeout(function(){ menuSearching=false; }, 0);
+}
 let glossOpen={};   // 분류별 펼침 상태 기억
 try{ glossOpen=JSON.parse(localStorage.getItem("gangho_gloss_open")||"{}"); }catch(e){ glossOpen={}; }
 let glossSearching=false;   // 검색 중 자동 펼침은 사용자 설정으로 기록하지 않음
@@ -2807,6 +2967,7 @@ try{
 document.body.style.overflow="hidden";
 renderSaved();
 renderGloss();
+renderMenu();
 quizStart();
 loadNoticeBanner();
 </script>
