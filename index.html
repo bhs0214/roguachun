@@ -370,6 +370,30 @@
   .roster-card>summary .alias{font-size:.78rem; font-weight:400; color:var(--gold-soft)}
   .roster-card>summary .meta{margin-left:auto; display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end}
   .roster-card>summary .badge{font-size:.72rem; font-weight:400; letter-spacing:.06em; border:1px solid var(--line); border-radius:20px; padding:.2em .7em; color:var(--paper-dim)}
+  .roster-card>summary .badge.act-go{color:#8ec49b; border-color:rgba(111,174,125,.5); background:rgba(111,174,125,.1)}
+  .roster-card>summary .badge.act-shut{color:var(--paper-dim); border-color:var(--line)}
+  .roster-card.dormant>summary .who{opacity:.62}
+  .roster-card.dormant:hover>summary .who{opacity:1}
+  .chip.act-only{white-space:nowrap}
+  .chip.act-only.active{border-color:#8ec49b; color:#8ec49b; background:rgba(111,174,125,.1)}
+  .act-legend{display:flex; flex-wrap:wrap; gap:.4rem .9rem; justify-content:center;
+    margin:.1rem 0 1.1rem; font-size:.76rem; color:var(--paper-dim); letter-spacing:.02em}
+  .act-legend span{display:inline-flex; align-items:center; gap:.35em}
+  .act-legend em{font-style:normal; opacity:.72}
+  .act-legend .d{width:7px; height:7px; border-radius:50%; display:inline-block; flex:none}
+  .act-legend .d.go{background:#8ec49b}
+  .act-legend .d.shut{background:#5a5f6b}
+  .old-fold{margin-top:1.6rem; border-style:dashed}
+  .old-fold>summary .who{color:var(--paper-dim)}
+  .old-body{padding-top:.2rem}
+  .old-body .roster-card{margin:.6rem 0}
+  @media(max-width:620px){
+    .act-legend{gap:.3rem .7rem; font-size:.72rem}
+    .act-legend em{display:none}
+  }
+  .admin-row .acttog{white-space:nowrap}
+  .admin-row .acttog.go{color:#8ec49b; border-color:rgba(111,174,125,.55); background:rgba(111,174,125,.08)}
+  .admin-row .acttog.shut{color:var(--paper-dim)}
   .roster-card.f-jung>summary{border-left:3px solid var(--blue)}
   .roster-card.f-sa>summary{border-left:3px solid var(--violet)}
   .roster-card.f-ma>summary{border-left:3px solid var(--crimson)}
@@ -1086,6 +1110,7 @@
           <button class="chip" data-f="ma" onclick="chipClick(this)">마교</button>
           <button class="chip" data-f="nang" onclick="chipClick(this)">낭인</button>
         </div>
+        <button id="actOnlyBtn" class="chip act-only" aria-pressed="false" onclick="toggleActOnly(this)">출행 중만</button>
         <select id="rosterSort" class="sort-sel" onchange="rosterFilter.sort=this.value;saveRosterSort();renderRoster()" aria-label="정렬 방식">
           <option value="reg">등재순</option>
           <option value="name">이름순</option>
@@ -1095,6 +1120,10 @@
         </select>
         <span id="rosterCount" class="count"></span>
         <button class="btn ghost" style="padding:.4em 1em;font-size:.85rem" onclick="loadRoster()">↻</button>
+      </div>
+      <div class="act-legend">
+        <span><i class="d go"></i>출행 <em>강호에 나와 있다</em></span>
+        <span><i class="d shut"></i>폐관 <em>문을 닫고 들었다 · 목록 아래에 접혀 있다</em></span>
       </div>
       <div id="rosterList"><div class="empty" style="text-align:center">인명부를 불러오는 중...</div></div>
     </section>
@@ -1596,6 +1625,18 @@ function toast(msg){
 
 /* ---- 인명부 ---- */
 const ROSTER_ORDER=["한마디","이름","별호","나이","성별","신장/체중","소속","무공","경지","외형","성격","특징","과거사","무기","선호/불호","비고"];
+/* ---- 활동 상태 : 출행 / 폐관 (관리 패널에서 직접 지정) ---- */
+const ACT_LABEL = {go:"출행", shut:"폐관"};
+function actKey(c){
+  const v = String(c["활동"]||"").trim();
+  if(v==="출행") return "go";
+  if(v==="폐관") return "shut";
+  return "";                                  // 미지정 → 뱃지 없음, 접히지도 않음
+}
+function actBadge(c){
+  const k = actKey(c);
+  return k ? '<span class="badge act-'+k+'">'+ACT_LABEL[k]+'</span>' : "";
+}
 function factionClass(c){
   const f=(c["진영"]||"").trim();
   if(f==="정") return "f-jung";
@@ -1620,17 +1661,26 @@ function rosterCard(c){
   const lvl=escapeHtml(c["경지"]||"-");
   const rows=ROSTER_ORDER.filter(k=>c[k]&&k!=="이름"&&k!=="이미지").map(k=>
     `<div class="roster-field"><span class="fk">${k}</span><span class="fv">${linkify(c[k])}</span></div>`).join("");
-  return `<details class="accordion roster-card ${factionClass(c)}">
+  const dim=(actKey(c)==="shut")?" dormant":"";
+  return `<details class="accordion roster-card ${factionClass(c)}${dim}">
     <summary><span class="mk">▶</span><span class="who">${name}${alias}</span>
-    <span class="meta"><span class="badge">${grp}</span><span class="badge">${lvl}</span></span></summary>
+    <span class="meta"><span class="badge">${grp}</span><span class="badge">${lvl}</span>${actBadge(c)}</span></summary>
     <div class="acc-body">${imgTag}${ownerTag}${rows||'<p class="empty">기재된 정보가 없습니다.</p>'}</div></details>`;
 }
 let ROSTER_ITEMS=[];
-let rosterFilter={q:"",f:"all",sect:"",sort:"reg"};
+let rosterFilter={q:"",f:"all",sect:"",sort:"reg",actOnly:false};
+try{ rosterFilter.actOnly = localStorage.getItem("gangho_roster_actonly")==="1"; }catch(e){}
 try{
   const sv=localStorage.getItem("gangho_roster_sort");
   if(["reg","name","level","levelAsc","recent"].indexOf(sv)>-1) rosterFilter.sort=sv;
 }catch(e){}
+function toggleActOnly(el){
+  rosterFilter.actOnly=!rosterFilter.actOnly;
+  el.classList.toggle("active", rosterFilter.actOnly);
+  el.setAttribute("aria-pressed", rosterFilter.actOnly?"true":"false");
+  try{ localStorage.setItem("gangho_roster_actonly", rosterFilter.actOnly?"1":"0"); }catch(e){}
+  renderRoster();
+}
 function chipClick(el){
   document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c===el));
   rosterFilter.f=el.dataset.f;
@@ -1736,12 +1786,26 @@ function renderRoster(){
     const own=(String(c["오너 공개"]||"").trim()==="공개") ? (c["오너"]||"") : "";
     return ((c["이름"]||"")+(c["별호"]||"")+(c["소속"]||"")+own).toLowerCase().includes(q);
   });
+  if(rosterFilter.actOnly) arr=arr.filter(function(c){ return actKey(c)==="go"; });
   arr=sortRoster(arr);
   cnt.textContent=arr.length+"명 / 전체 "+ROSTER_ITEMS.length+"명";
   renderSectBoard();
   const tot=document.getElementById("rosterTotal");
   if(tot) tot.textContent="現在 "+ROSTER_ITEMS.length+"人의 무인이 강호를 거닌다";
-  box.innerHTML=arr.length?arr.map(rosterCard).join(""):'<div class="empty" style="text-align:center">조건에 맞는 무인이 없습니다.</div>';
+  if(!arr.length){
+    box.innerHTML='<div class="empty" style="text-align:center">조건에 맞는 무인이 없습니다.</div>';
+    return;
+  }
+  const fresh=[], shut=[];
+  arr.forEach(function(c){ (actKey(c)==="shut" ? shut : fresh).push(c); });
+  let html=fresh.map(rosterCard).join("");
+  if(shut.length){
+    html+='<details class="accordion old-fold"><summary><span class="mk">▶</span>'
+      +'<span class="who">폐관 중인 인물<span class="alias">문을 닫고 든 이들. 눌러서 펼칩니다.</span></span>'
+      +'<span class="meta"><span class="badge">'+shut.length+'명</span></span></summary>'
+      +'<div class="acc-body old-body">'+shut.map(rosterCard).join("")+'</div></details>';
+  }
+  box.innerHTML=html;
 }
 async function loadRoster(){
   const box=document.getElementById("rosterList");
@@ -1753,6 +1817,9 @@ async function loadRoster(){
     ROSTER_ITEMS=Array.isArray(data)?data:[];
     const ss=document.getElementById("rosterSort");
     if(ss) ss.value=rosterFilter.sort||"reg";
+    const ab=document.getElementById("actOnlyBtn");
+    if(ab){ ab.classList.toggle("active", !!rosterFilter.actOnly);
+            ab.setAttribute("aria-pressed", rosterFilter.actOnly?"true":"false"); }
     renderRoster();
   }catch(e){
     ROSTER_ITEMS=[];
@@ -2439,10 +2506,10 @@ function quizCopy(){
 }
 
 const ADM_FIELDS = {
-  characters: ["이름","별호","나이","성별","신장/체중","소속","경지","무공","외형","이미지","성격","특징","과거사","무기","선호/불호","한마디","비고","오너","오너 공개","진영"],
+  characters: ["이름","별호","나이","성별","신장/체중","소속","경지","무공","외형","이미지","성격","특징","과거사","무기","선호/불호","한마디","비고","활동","오너","오너 공개","진영"],
   wanted: ["이름","별호","죄목","현상금","위험 등급","경지","소속","인상착의","행적","비고"]
 };
-const ADM_SELECT = {"오너 공개":["비공개","공개"]};
+const ADM_SELECT = {"오너 공개":["비공개","공개"], "활동":["출행","폐관"]};
 const ADM_LONG = new Set(["무공","외형","성격","특징","과거사","선호/불호","한마디","비고","인상착의","행적"]);
 const ADM_FILE = {characters:"characters.json", wanted:"wanted.json", notice:"notice.json"};
 let ADM = {token:"", owner:"", repo:"", branch:"main", cur:"characters",
@@ -2764,8 +2831,16 @@ function adminRenderList(){
   box.innerHTML=head+arr.map(function(c,i){
     const nm=escapeHtml(c["이름"]||c["별호"]||"(이름 없음)");
     const mt=escapeHtml(ADM.cur==="characters"?((c["소속"]||"")+" · "+(c["경지"]||"")):((c["현상금"]||"")));
+    let tog="";
+    if(ADM.cur==="characters"){
+      const k=actKey(c);
+      const txt = k==="go" ? "◉ 출행" : (k==="shut" ? "○ 폐관" : "· 미지정");
+      const tip = k==="go" ? "강호에 나와 있음 — 누르면 폐관으로"
+                : (k==="shut" ? "폐관 중 — 누르면 출행으로" : "아직 정하지 않음 — 누르면 출행으로");
+      tog='<button class="acttog '+k+'" onclick="adminToggleAct('+i+')" title="'+tip+'">'+txt+'</button>';
+    }
     return '<div class="admin-row"><span class="nm">'+nm+'</span><span class="mt">'+mt+'</span>'
-      +'<span class="sp"><button onclick="adminEdit('+i+')">수정</button>'
+      +'<span class="sp">'+tog+'<button onclick="adminEdit('+i+')">수정</button>'
       +'<button class="del" onclick="adminDelete('+i+')">삭제</button></span></div>';
   }).join("");
 }
@@ -2832,6 +2907,24 @@ async function adminSaveEntry(){
     }
   }catch(e){
     if(ADM.editIdx<0) arr.pop();
+    admMsg("저장 실패: "+e.message, false);
+  }
+}
+async function adminToggleAct(i){
+  const c=(ADM.data.characters||[])[i];
+  if(!c) return;
+  const prev=c["활동"];
+  c["활동"] = (actKey(c)==="go") ? "폐관" : "출행";   // 미지정도 첫 클릭에 출행
+  admMsg("깃허브에 저장하는 중...", true);
+  try{
+    await ghSave("characters", "활동 상태 "+c["활동"]+": "+(c["이름"]||""));
+    rosterLoaded=false;
+    adminRenderList();
+    admMsg((c["이름"]||"")+" — "+c["활동"]+"으로 바꿨습니다."
+      +(c["활동"]==="폐관"?" 인명부 맨 아래로 접힙니다.":"")+" 약 1분 내 반영됩니다.", true);
+  }catch(e){
+    if(prev===undefined) delete c["활동"]; else c["활동"]=prev;
+    adminRenderList();
     admMsg("저장 실패: "+e.message, false);
   }
 }
