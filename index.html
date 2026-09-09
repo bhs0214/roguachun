@@ -383,10 +383,18 @@
   .act-legend .d{width:7px; height:7px; border-radius:50%; display:inline-block; flex:none}
   .act-legend .d.go{background:#8ec49b}
   .act-legend .d.shut{background:#5a5f6b}
+  .act-legend .d.gone{background:none; border:1px solid #5a5f6b}
   .old-fold{margin-top:1.6rem; border-style:dashed}
   .old-fold>summary .who{color:var(--paper-dim)}
   .old-body{padding-top:.2rem}
   .old-body .roster-card{margin:.6rem 0}
+  .gone-strip{margin-top:1.1rem; padding-top:.9rem; border-top:1px dashed var(--line)}
+  .gone-head{font-size:.75rem; color:var(--paper-dim); letter-spacing:.1em;
+    text-align:center; margin-bottom:.7rem; opacity:.8}
+  .gone-names{display:flex; flex-wrap:wrap; gap:.4rem .45rem; justify-content:center}
+  .gn{font-family:var(--serif); font-size:.84rem; color:var(--paper-dim);
+    border:1px solid var(--line); border-radius:20px; padding:.22em .85em; opacity:.75}
+  .gn i{font-style:normal; font-size:.74rem; opacity:.65; margin-left:.4em}
   @media(max-width:620px){
     .act-legend{gap:.3rem .7rem; font-size:.72rem}
     .act-legend em{display:none}
@@ -394,6 +402,9 @@
   .admin-row .acttog{white-space:nowrap}
   .admin-row .acttog.go{color:#8ec49b; border-color:rgba(111,174,125,.55); background:rgba(111,174,125,.08)}
   .admin-row .acttog.shut{color:var(--paper-dim)}
+  .admin-row .st{font-size:.72rem; border:1px solid var(--line); border-radius:20px;
+    padding:.15em .6em; color:var(--paper-dim); white-space:nowrap}
+  .admin-row .st.hid{color:#c98a7a; border-color:rgba(194,91,82,.45)}
   .roster-card.f-jung>summary{border-left:3px solid var(--blue)}
   .roster-card.f-sa>summary{border-left:3px solid var(--violet)}
   .roster-card.f-ma>summary{border-left:3px solid var(--crimson)}
@@ -1124,6 +1135,7 @@
       <div class="act-legend">
         <span><i class="d go"></i>출행 <em>강호에 나와 있다</em></span>
         <span><i class="d shut"></i>폐관 <em>문을 닫고 들었다 · 목록 아래에 접혀 있다</em></span>
+        <span><i class="d gone"></i>오래된 폐관 <em>접기 안에 이름만 남는다</em></span>
       </div>
       <div id="rosterList"><div class="empty" style="text-align:center">인명부를 불러오는 중...</div></div>
     </section>
@@ -1627,11 +1639,29 @@ function toast(msg){
 const ROSTER_ORDER=["한마디","이름","별호","나이","성별","신장/체중","소속","무공","경지","외형","성격","특징","과거사","무기","선호/불호","비고"];
 /* ---- 활동 상태 : 출행 / 폐관 (관리 패널에서 직접 지정) ---- */
 const ACT_LABEL = {go:"출행", shut:"폐관"};
+const HIDE_AFTER = 30;    // 폐관하고 이 날수가 지나면 인명부에서 아예 감춘다
+function todayStr(){
+  const d=new Date(), p=function(n){return String(n).padStart(2,"0");};
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function daysSince(s){
+  const m=String(s||"").trim().match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+  if(!m) return null;
+  const t=new Date(+m[1], +m[2]-1, +m[3]);
+  if(isNaN(t.getTime())) return null;
+  const now=new Date(); now.setHours(0,0,0,0);
+  return Math.max(0, Math.round((now-t)/86400000));
+}
 function actKey(c){
   const v = String(c["활동"]||"").trim();
   if(v==="출행") return "go";
   if(v==="폐관") return "shut";
   return "";                                  // 미지정 → 뱃지 없음, 접히지도 않음
+}
+function actHidden(c){                        // 폐관한 지 오래 → 인명부에서 감춤
+  if(actKey(c)!=="shut") return false;
+  const d=daysSince(c["폐관일"]);
+  return d!==null && d>HIDE_AFTER;            // 폐관일이 없으면 감추지 않는다
 }
 function actBadge(c){
   const k = actKey(c);
@@ -1668,6 +1698,7 @@ function rosterCard(c){
     <div class="acc-body">${imgTag}${ownerTag}${rows||'<p class="empty">기재된 정보가 없습니다.</p>'}</div></details>`;
 }
 let ROSTER_ITEMS=[];
+let ROSTER_GONE=[];        // 오래 소식이 없어 이름만 남긴 인물
 let rosterFilter={q:"",f:"all",sect:"",sort:"reg",actOnly:false};
 try{ rosterFilter.actOnly = localStorage.getItem("gangho_roster_actonly")==="1"; }catch(e){}
 try{
@@ -1769,15 +1800,8 @@ function sortRoster(arr){
 function saveRosterSort(){
   try{ localStorage.setItem("gangho_roster_sort", rosterFilter.sort||"reg"); }catch(e){}
 }
-function renderRoster(){
-  const box=document.getElementById("rosterList");
-  const cnt=document.getElementById("rosterCount");
-  if(!ROSTER_ITEMS.length){
-    cnt.textContent="";
-    box.innerHTML='<div class="empty" style="text-align:center">아직 인명부에 오른 무인이 없습니다.<br>생성기에서 프로필을 만들어 관리진에게 제출해 보세요.</div>';
-    return;
-  }
-  let arr=ROSTER_ITEMS;
+function rosterMatch(list){
+  let arr=list;
   if(rosterFilter.sect) arr=arr.filter(c=>normGroup(c)===rosterFilter.sect);
   if(rosterFilter.f!=="all") arr=arr.filter(c=>factionClass(c)==="f-"+rosterFilter.f);
   const q=(rosterFilter.q||"").trim().toLowerCase();
@@ -1786,25 +1810,43 @@ function renderRoster(){
     const own=(String(c["오너 공개"]||"").trim()==="공개") ? (c["오너"]||"") : "";
     return ((c["이름"]||"")+(c["별호"]||"")+(c["소속"]||"")+own).toLowerCase().includes(q);
   });
+  return arr;
+}
+function renderRoster(){
+  const box=document.getElementById("rosterList");
+  const cnt=document.getElementById("rosterCount");
+  if(!ROSTER_ITEMS.length){
+    cnt.textContent="";
+    box.innerHTML='<div class="empty" style="text-align:center">아직 인명부에 오른 무인이 없습니다.<br>생성기에서 프로필을 만들어 관리진에게 제출해 보세요.</div>';
+    return;
+  }
+  let arr=rosterMatch(ROSTER_ITEMS);
   if(rosterFilter.actOnly) arr=arr.filter(function(c){ return actKey(c)==="go"; });
   arr=sortRoster(arr);
   cnt.textContent=arr.length+"명 / 전체 "+ROSTER_ITEMS.length+"명";
   renderSectBoard();
   const tot=document.getElementById("rosterTotal");
   if(tot) tot.textContent="現在 "+ROSTER_ITEMS.length+"人의 무인이 강호를 거닌다";
-  if(!arr.length){
-    box.innerHTML='<div class="empty" style="text-align:center">조건에 맞는 무인이 없습니다.</div>';
-    return;
-  }
+  const gone = rosterFilter.actOnly ? [] : rosterMatch(ROSTER_GONE);
   const fresh=[], shut=[];
   arr.forEach(function(c){ (actKey(c)==="shut" ? shut : fresh).push(c); });
   let html=fresh.map(rosterCard).join("");
-  if(shut.length){
+  if(shut.length || gone.length){
+    let inner=shut.map(rosterCard).join("");
+    if(gone.length){
+      inner+='<div class="gone-strip"><div class="gone-head">오래 소식이 없는 이름</div>'
+        +'<div class="gone-names">'+gone.map(function(c){
+            const al=c["별호"]?'<i>'+escapeHtml(c["별호"])+'</i>':"";
+            return '<span class="gn">'+escapeHtml(c["이름"]||"무명")+al+'</span>';
+          }).join("")+'</div></div>';
+    }
     html+='<details class="accordion old-fold"><summary><span class="mk">▶</span>'
       +'<span class="who">폐관 중인 인물<span class="alias">문을 닫고 든 이들. 눌러서 펼칩니다.</span></span>'
-      +'<span class="meta"><span class="badge">'+shut.length+'명</span></span></summary>'
-      +'<div class="acc-body old-body">'+shut.map(rosterCard).join("")+'</div></details>';
+      +'<span class="meta"><span class="badge">'+(shut.length+gone.length)+'명</span></span></summary>'
+      +'<div class="acc-body old-body">'+inner+'</div></details>';
   }
+  if(!html) html='<div class="empty" style="text-align:center">조건에 맞는 무인이 없습니다.</div>';
+  else if(!fresh.length) html='<div class="empty" style="text-align:center;margin-bottom:.6rem">조건에 맞는 무인은 아래 접기 안에 있습니다.</div>'+html;
   box.innerHTML=html;
 }
 async function loadRoster(){
@@ -1814,7 +1856,9 @@ async function loadRoster(){
     const r=await fetch("characters.json?t="+Date.now());
     if(!r.ok) throw new Error("HTTP "+r.status);
     const data=await r.json();
-    ROSTER_ITEMS=Array.isArray(data)?data:[];
+    const _all=Array.isArray(data)?data:[];
+    ROSTER_GONE =_all.filter(function(c){ return  actHidden(c); });
+    ROSTER_ITEMS=_all.filter(function(c){ return !actHidden(c); });
     const ss=document.getElementById("rosterSort");
     if(ss) ss.value=rosterFilter.sort||"reg";
     const ab=document.getElementById("actOnlyBtn");
@@ -2831,15 +2875,21 @@ function adminRenderList(){
   box.innerHTML=head+arr.map(function(c,i){
     const nm=escapeHtml(c["이름"]||c["별호"]||"(이름 없음)");
     const mt=escapeHtml(ADM.cur==="characters"?((c["소속"]||"")+" · "+(c["경지"]||"")):((c["현상금"]||"")));
-    let tog="";
+    let tog="", note="";
     if(ADM.cur==="characters"){
       const k=actKey(c);
       const txt = k==="go" ? "◉ 출행" : (k==="shut" ? "○ 폐관" : "· 미지정");
       const tip = k==="go" ? "강호에 나와 있음 — 누르면 폐관으로"
                 : (k==="shut" ? "폐관 중 — 누르면 출행으로" : "아직 정하지 않음 — 누르면 출행으로");
       tog='<button class="acttog '+k+'" onclick="adminToggleAct('+i+')" title="'+tip+'">'+txt+'</button>';
+      if(k==="shut"){
+        const dd=daysSince(c["폐관일"]);
+        if(dd!==null) note = actHidden(c)
+          ? '<span class="st hid" title="인명부에서 보이지 않습니다. 출행으로 바꾸면 바로 돌아옵니다.">숨김 · '+dd+'일</span>'
+          : '<span class="st">폐관 '+dd+'일</span>';
+      }
     }
-    return '<div class="admin-row"><span class="nm">'+nm+'</span><span class="mt">'+mt+'</span>'
+    return '<div class="admin-row"><span class="nm">'+nm+'</span><span class="mt">'+mt+'</span>'+note
       +'<span class="sp">'+tog+'<button onclick="adminEdit('+i+')">수정</button>'
       +'<button class="del" onclick="adminDelete('+i+')">삭제</button></span></div>';
   }).join("");
@@ -2890,6 +2940,7 @@ async function adminSaveEntry(){
     if(v) obj[el.dataset.k]=v; else delete obj[el.dataset.k];
   });
   if(!obj["이름"]&&!obj["별호"]){ admMsg("이름 또는 별호는 있어야 합니다.", false); return; }
+  if(ADM.cur==="characters") admStampAct(obj);
   const arr=ADM.data[ADM.cur];
   if(ADM.editIdx>=0) arr[ADM.editIdx]=obj; else arr.push(obj);
   admMsg("깃허브에 저장하는 중...", true);
@@ -2910,20 +2961,29 @@ async function adminSaveEntry(){
     admMsg("저장 실패: "+e.message, false);
   }
 }
+/* 폐관으로 바뀌면 그날 날짜를 자동으로 찍고, 출행으로 돌아오면 지운다 */
+function admStampAct(o){
+  if(String(o["활동"]||"").trim()==="폐관"){ if(!o["폐관일"]) o["폐관일"]=todayStr(); }
+  else delete o["폐관일"];
+  return o;
+}
 async function adminToggleAct(i){
   const c=(ADM.data.characters||[])[i];
   if(!c) return;
-  const prev=c["활동"];
+  const prev=c["활동"], prevD=c["폐관일"];
   c["활동"] = (actKey(c)==="go") ? "폐관" : "출행";   // 미지정도 첫 클릭에 출행
+  admStampAct(c);
   admMsg("깃허브에 저장하는 중...", true);
   try{
     await ghSave("characters", "활동 상태 "+c["활동"]+": "+(c["이름"]||""));
     rosterLoaded=false;
     adminRenderList();
     admMsg((c["이름"]||"")+" — "+c["활동"]+"으로 바꿨습니다."
-      +(c["활동"]==="폐관"?" 인명부 맨 아래로 접힙니다.":"")+" 약 1분 내 반영됩니다.", true);
+      +(c["활동"]==="폐관"?(" 인명부 맨 아래로 접히고, "+HIDE_AFTER+"일이 지나면 목록에서 감춰집니다."):"")
+      +" 약 1분 내 반영됩니다.", true);
   }catch(e){
     if(prev===undefined) delete c["활동"]; else c["활동"]=prev;
+    if(prevD===undefined) delete c["폐관일"]; else c["폐관일"]=prevD;
     adminRenderList();
     admMsg("저장 실패: "+e.message, false);
   }
