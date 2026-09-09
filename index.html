@@ -409,6 +409,7 @@
   .roster-card.f-sa>summary{border-left:3px solid var(--violet)}
   .roster-card.f-ma>summary{border-left:3px solid var(--crimson)}
   .roster-card.f-nang>summary{border-left:3px solid var(--paper-dim)}
+  .roster-card.f-etc>summary{border-left:3px solid #5f8a8b}
   .roster-field{display:flex; gap:.7rem; padding:.45em 0; border-bottom:1px dashed rgba(44,47,55,.7); font-size:.93rem}
   .roster-field:last-child{border-bottom:none}
   .roster-field .fk{flex:0 0 5.2em; color:var(--gold-soft)}
@@ -579,6 +580,7 @@
   .sect-chip.f-sa{border-left:3px solid var(--violet)}
   .sect-chip.f-ma{border-left:3px solid var(--crimson)}
   .sect-chip.f-nang{border-left:3px solid var(--paper-dim)}
+  .sect-chip.f-etc{border-left:3px solid #5f8a8b}
   /* 재방문 시 / 모션 최소화 설정 시 : 표지 애니메이션 생략 */
   #cover.instant *{animation-duration:.01s !important; animation-delay:0s !important}
   @media (prefers-reduced-motion: reduce){
@@ -1120,6 +1122,7 @@
           <button class="chip" data-f="sa" onclick="chipClick(this)">사파</button>
           <button class="chip" data-f="ma" onclick="chipClick(this)">마교</button>
           <button class="chip" data-f="nang" onclick="chipClick(this)">낭인</button>
+          <button class="chip" data-f="etc" onclick="chipClick(this)">기타</button>
         </div>
         <button id="actOnlyBtn" class="chip act-only" aria-pressed="false" onclick="toggleActOnly(this)">출행 중만</button>
         <select id="rosterSort" class="sort-sel" onchange="rosterFilter.sort=this.value;saveRosterSort();renderRoster()" aria-label="정렬 방식">
@@ -1639,7 +1642,7 @@ function toast(msg){
 const ROSTER_ORDER=["한마디","이름","별호","나이","성별","신장/체중","소속","무공","경지","외형","성격","특징","과거사","무기","선호/불호","비고"];
 /* ---- 활동 상태 : 출행 / 폐관 (관리 패널에서 직접 지정) ---- */
 const ACT_LABEL = {go:"출행", shut:"폐관"};
-const HIDE_AFTER = 30;    // 폐관하고 이 날수가 지나면 인명부에서 아예 감춘다
+const HIDE_AFTER = 7;     // 폐관하고 이 날수가 지나면 이름만 남긴다
 function todayStr(){
   const d=new Date(), p=function(n){return String(n).padStart(2,"0");};
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
@@ -1673,9 +1676,11 @@ function factionClass(c){
   if(f==="사") return "f-sa";
   if(f==="마") return "f-ma";
   if(f==="낭인") return "f-nang";
+  if(f==="기타") return "f-etc";
   const g=(c["소속"]||"");
   if(/천마신교|마교|혈교|일월신교|배화교|명교/.test(g)) return "f-ma";
   if(/사파|흑도|사도련|하오문|녹림|장강|수로채|기루|기녀|기방|루주/.test(g)) return "f-sa";
+  if(/객잔|점소이|숙수|악사|상단|표국|궁주/.test(g)) return "f-etc";   // 생업 — 문파가 아닌 자리
   if(/낭인|무소속/.test(g)) return "f-nang";
   if(g) return "f-jung";
   return "f-nang";
